@@ -20,5 +20,41 @@ createInertiaApp({
     },
 });
 
-// This will set light / dark mode on load...
 initializeTheme();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    try {
+      const link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+      const manifestHref = link?.getAttribute('href') ?? 'manifest.webmanifest';
+      const manifestUrl = new URL(manifestHref, window.location.origin);
+      const basePath = manifestUrl.pathname.replace(/manifest\.webmanifest$/, '');
+      const swUrl = basePath + 'service-worker.js';
+
+      navigator.serviceWorker.register(swUrl, { scope: basePath }).then(() => {
+        navigator.serviceWorker.getRegistrations().then((regs) => {
+          regs.forEach((reg) => {
+            try {
+              const regPath = new URL(reg.scope).pathname;
+              if (regPath !== basePath) {
+                reg.unregister();
+              }
+            } catch {}
+          });
+        });
+      }).catch((err) => {
+        console.error('SW registration failed:', err);
+      });
+    } catch (err) {
+      console.error('SW registration error:', err);
+    }
+  });
+}
+
+window.addEventListener('beforeinstallprompt', (e: Event) => {
+  console.log('PWA: beforeinstallprompt fired');
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('PWA: appinstalled');
+});
