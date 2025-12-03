@@ -1,24 +1,22 @@
-import React, { useState } from 'react';
-import { useForm } from '@inertiajs/react';
-import { toast } from 'sonner'; // or your preferred toast
-import { CalendarCheck, CalendarDays, CornerDownRight, FileDigit, FilePlus, List, Mail, MapPin, PencilLine, Plus, SquarePlus, VenusAndMars } from 'lucide-react';
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select";
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select"
+import { useForm } from '@inertiajs/react';
+import { CalendarDays, CornerDownRight, FileDigit, FilePlus, List, Mail, MapPin, PencilLine, Plus, SquarePlus, VenusAndMars } from 'lucide-react';
+import React, { useState } from 'react';
+import { toast } from 'sonner'; // or your preferred toast
 
 type Applicant = {
   id: number;
@@ -79,7 +77,7 @@ const CreateStudentDialog = ({ applicants }: Props) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    post(route('admin.students.store'), {
+    post(route('teacher.students.store'), {
       onSuccess: () => {
         toast.success('Student created!');
         setData(getDefaultStudentFormData());
@@ -104,7 +102,7 @@ const handleApplicantChange = (applicantId: number | null) => {
         email: selectedApplicant.email, // or applicant.email if available
         address: selectedApplicant.address,
         contact_number: selectedApplicant.contact_number,
-        gender: selectedApplicant.gender,
+        gender: (selectedApplicant.gender || '').toLowerCase(),
         birthdate: selectedApplicant.birthdate,
       });
     }
@@ -371,9 +369,8 @@ const handleApplicantChange = (applicantId: number | null) => {
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Gender</SelectLabel>
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Others">Others</SelectItem>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>

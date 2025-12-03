@@ -258,6 +258,21 @@ Route::middleware(['auth', 'verified', 'role:teacher'])
         Route::put('/{enrollment}', [GradeController::class, 'update'])->name('update');
         Route::get('{enrollment}/edit', [GradeController::class, 'teacherEdit'])->name('edit');
     });
+
+    Route::prefix('enrollments')->name('enrollments.')->group(function () {
+        Route::get('/', [EnrollmentController::class, 'teacherIndex'])->name('index');
+        Route::post('/', [EnrollmentController::class, 'store'])->name('store');
+    });
+
+    Route::prefix('students')->name('students.')->group(function () {
+        Route::get('/', [StudentController::class, 'teacherIndex'])->name('index');
+        Route::post('/', [StudentController::class, 'store'])->name('store');
+    });
+
+    Route::prefix('applicants')->name('applicants.')->group(function () {
+        Route::get('/', [ApplicantController::class, 'teacherIndex'])->name('index');
+        Route::post('/', [ApplicantController::class, 'store'])->name('store');
+    });
 });
 
 Route::middleware(['auth', 'verified', 'role:student'])

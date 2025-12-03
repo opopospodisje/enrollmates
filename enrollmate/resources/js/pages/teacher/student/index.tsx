@@ -1,32 +1,26 @@
-import { type BreadcrumbItem } from '@/types';
-import AppLayout from '@/layouts/app-layout';
-import { Head, router, useForm } from '@inertiajs/react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { BookUp2, List, ListTodo } from 'lucide-react';
-import * as React from "react"
-import { ColumnFiltersState, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState, } from "@tanstack/react-table"
-import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
-import { Separator } from '@/components/ui/separator';
-import TableToolbar from '@/components/table/TableToolbar';
-import { useState } from 'react';
-import CreateStudentDialog from './Components/CreateStudentDialog';
-import RoomTable from '@/components/table/RoomTable';
-import { getColumns } from './Components/studentColumns';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import Heading from '@/components/heading';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
+import RoomTable from '@/components/table/RoomTable';
+import TableToolbar from '@/components/table/TableToolbar';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Separator } from '@/components/ui/separator';
+import { Toaster } from '@/components/ui/sonner';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, router, useForm } from '@inertiajs/react';
+import { ColumnFiltersState, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState, } from "@tanstack/react-table";
+import { BookUp2, ListTodo } from 'lucide-react';
+import * as React from "react";
+import { useState } from 'react';
+import { toast } from 'sonner';
+import CreateStudentDialog from './Components/CreateStudentDialog';
+import { getColumns } from './Components/studentColumns';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
     title: 'Students',
-    href: '/students',
+    href: '/teacher/students',
   },
 ];
 
@@ -127,7 +121,7 @@ const StudentIndex = ({ students,applicants,pendingApplicants }: StudentIndexPro
 
   function handleFilterChange(newFilter: string) {
     setFilter(newFilter);
-    router.get(route('admin.students.index', { filter: newFilter }), {}, { preserveState: true });
+    router.get(route('teacher.students.index', { filter: newFilter }), {}, { preserveState: true });
   }
 
   return (
