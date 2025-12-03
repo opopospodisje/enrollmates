@@ -6,7 +6,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, CornerDownRight, Layers, Table2 } from 'lucide-react';
 import * as React from "react";
-import route from 'ziggy-js';
+import { route } from 'ziggy-js';
 import EditGradeLevelDialog from '../../admin/gradelevel/Components/EditGradeLevelDialog';
 
 const breadcrumbs: BreadcrumbItem[] = [

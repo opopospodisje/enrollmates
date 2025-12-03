@@ -22,7 +22,7 @@ createInertiaApp({
 
 initializeTheme();
 
-if ('serviceWorker' in navigator) {
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     try {
       const link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
@@ -48,6 +48,16 @@ if ('serviceWorker' in navigator) {
     } catch (err) {
       console.error('SW registration error:', err);
     }
+  });
+}
+
+if (!import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      regs.forEach((reg) => {
+        try { reg.unregister(); } catch {}
+      });
+    });
   });
 }
 
