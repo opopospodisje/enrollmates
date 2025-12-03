@@ -23,6 +23,8 @@ use App\Http\Controllers\TeacherPageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SchoolSettingsController;
 use App\Http\Controllers\AlumniController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
     if (!Auth::check()) {
@@ -31,11 +33,15 @@ Route::get('/', function () {
 
     $user = Auth::user();
 
-    if ($user->hasRole('admin')) {
+    $role = DB::table('model_has_roles')
+        ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+        ->where('model_has_roles.model_id', $user->id)
+        ->value('roles.name');
+    if ($role === 'admin') {
         return redirect()->route('admin.dashboard'); // admin dashboard
-    } elseif ($user->hasRole('teacher')) {
+    } elseif ($role === 'teacher') {
         return redirect()->route('teacher.dashboard'); // teacher dashboard
-    } elseif ($user->hasRole('student')) {
+    } elseif ($role === 'student') {
         return redirect()->route('student.home'); // (if you have one)
     }
 
@@ -267,6 +273,7 @@ Route::middleware(['auth', 'verified', 'role:teacher'])
     Route::prefix('students')->name('students.')->group(function () {
         Route::get('/', [StudentController::class, 'teacherIndex'])->name('index');
         Route::post('/', [StudentController::class, 'store'])->name('store');
+        Route::get('/{student}/show', [StudentController::class, 'teacherShow'])->name('show');
     });
 
     Route::prefix('applicants')->name('applicants.')->group(function () {

@@ -1,68 +1,73 @@
-import {type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, CornerDownRight, Layers, Table2 } from 'lucide-react';
-import * as React from "react"
-import { Button } from "@/components/ui/button"
+import { ArrowLeft, CornerDownRight, User } from 'lucide-react';
+import * as React from "react";
+import { Button } from "@/components/ui/button";
 import { Toaster } from '@/components/ui/sonner';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import EditGradeLevelDialog from './Components/EditStudentDialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
-    title: 'Grade Levels',
-    href: '/gradelevels',
+    title: 'Students',
+    href: '/admin/students',
   },
   {
-    title: 'Show',
+    title: 'Profile',
     href: ``,
   },
 ];
 
-type GradeLevel = {
+type Student = {
   id: number;
-  name: string;
+  lrn: string | null;
+  first_name: string;
+  last_name: string;
+  middle_name: string | null;
+  suffix: string | null;
+  email: string;
+  address: string | null;
+  contact_number: string | null;
+  gender: string;
+  birthdate: string | null;
+  full_name: string;
+  current_class_name: string | null;
 };
 
+type Props = { student: Student };
 
-type GradeLevelShowProps = {
-  gradeLevel: GradeLevel;
-};
-
-const GradeLevelShow = ({gradeLevel}: GradeLevelShowProps) => {
-
+const AdminStudentShow = ({ student }: Props) => {
   return (
     <div className="container mx-auto">
-      <Head title="Grade Levels" />
+      <Head title="Student Profile" />
       <Toaster position='top-center' />
 
       <div className="mb-4">
           <div className='flex justify-between items-center px-2 gap-2 text-md text-muted-foreground border-y w-50 mb-2'>
-            <h4>Grade Level id:</h4>
-            <div className='bg-accent px-4'>{gradeLevel.id}</div>            
+            <h4>Student ID:</h4>
+            <div className='bg-accent px-4'>{student.id}</div>
           </div>
 
-          <div className='flex justify-between items-center px-4'> 
+          <div className='flex justify-between items-center px-4'>
             <div className="flex items-center gap-2">
-                <Layers className="text-muted-foreground" size={28} />
-                <h1 className='text-4xl capitalize font-bold'>{gradeLevel.name}</h1>
+                <User className="text-muted-foreground" size={28} />
+                <h1 className='text-2xl capitalize font-bold'>{student.full_name}</h1>
             </div>
-            
-          <div className='flex gap-2'>
-              <Link href={route('gradelevels.index')}>
+
+            <div className='flex gap-2'>
+              <Link href={route('admin.students.index')}>
                 <Button className="text-white dark:text-black">
                   <ArrowLeft size={24}/>
-                    Back
+                  Back
                 </Button>
               </Link>
-              <EditGradeLevelDialog gradeLevel={gradeLevel} buttonStyle='withName' />
-          </div>
+            </div>
 
           </div>
-          
+
           <div className="flex items-center px-8 gap-2">
             <CornerDownRight className="text-muted-foreground" size={18} />
-            <p className="italic text-muted-foreground">Grade Level Name</p>
+            <p className="italic text-muted-foreground">Current class: {student.current_class_name ?? 'Not enrolled this school year'}</p>
           </div>
       </div>
 
@@ -70,26 +75,34 @@ const GradeLevelShow = ({gradeLevel}: GradeLevelShowProps) => {
         <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
       </div>
 
-      <div className='relative p-2 bg-neutral-300 dark:bg-neutral-800 flex items-center rounded-t-lg gap-2'>
-        <Table2 size={18} />
-        <h3 className='font-medium'>Related Table</h3>
-      </div>
-
-      <div className='border rounded-b-lg gap-2 p-4'>
-{
-//
-//       <GradeLevelIndex
-//         rooms={rooms}
-//       />
-//
-}
+      <div className='border rounded-lg gap-4 p-4 grid grid-cols-2'>
+        <div>
+          <div className='font-semibold'>LRN</div>
+          <div>{student.lrn ?? '—'}</div>
+        </div>
+        <div>
+          <div className='font-semibold'>Email</div>
+          <div>{student.email}</div>
+        </div>
+        <div>
+          <div className='font-semibold'>Contact</div>
+          <div>{student.contact_number ?? '—'}</div>
+        </div>
+        <div>
+          <div className='font-semibold'>Birthdate</div>
+          <div>{student.birthdate ?? '—'}</div>
+        </div>
+        <div className='col-span-2'>
+          <div className='font-semibold'>Address</div>
+          <div>{student.address ?? '—'}</div>
+        </div>
       </div>
     </div>
   );
 };
 
-GradeLevelShow.layout = (page: React.ReactNode) => (
+AdminStudentShow.layout = (page: React.ReactNode) => (
   <AppLayout breadcrumbs={breadcrumbs}>{page}</AppLayout>
 );
 
-export default GradeLevelShow;
+export default AdminStudentShow;

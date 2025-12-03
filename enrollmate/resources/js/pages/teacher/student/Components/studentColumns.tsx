@@ -169,7 +169,7 @@ export const getColumns = ({
         const student = row.original;
         return (
           <div className="flex justify-center gap-2">
-            <Link href={`/students/${student.id}/show`}><Button variant={'outline'}><Eye /></Button></Link>
+            <Link href={route('teacher.students.show', student.id)}><Button variant={'outline'}><Eye /></Button></Link>
             <EditStudentDialog student={student} applicants={applicants} />
             <AlertDialog>
               <AlertDialogTrigger asChild><Button variant={'outline'} className='text-red-600'><Trash2 /></Button></AlertDialogTrigger>
