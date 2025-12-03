@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { LoaderCircle, UserRound } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
@@ -115,6 +115,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     </form>
 
                     {status && <div className="mt-4 text-center text-sm font-medium text-green-300">{status}</div>}
+                    <div className="mt-4 text-center text-sm">
+                        <span className="text-neutral-200">Don't have an account? </span>
+                        <Link href={route('signup.form')} className="underline text-white">Sign up</Link>
+                    </div>
                 </div>
             </div>
         </div>
