@@ -14,6 +14,7 @@ use App\Http\Requests\StoreEnrollmentRequest;
 use App\Http\Requests\UpdateEnrollmentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 
 class EnrollmentController extends Controller
@@ -248,7 +249,11 @@ class EnrollmentController extends Controller
         $validated = $request->validated();
 
         $user = Auth::user();
-        if ($user && $user->hasRole('teacher')) {
+        $role = $user ? DB::table('model_has_roles')
+            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('model_has_roles.model_id', $user->id)
+            ->value('roles.name') : null;
+        if ($role === 'teacher') {
             $teacherId = $user->teacher?->id;
             $ownsClass = ClassGroupSubject::where('class_group_id', $validated['class_group_id'])
                 ->where('teacher_id', $teacherId)
@@ -276,7 +281,7 @@ class EnrollmentController extends Controller
             ]);
         }
 
-        if ($user && $user->hasRole('teacher')) {
+        if ($role === 'teacher') {
             return redirect()->route('teacher.enrollments.index')->with('success', 'Enrollment created successfully.');
         }
         return redirect()->route('admin.enrollments.index')->with('success', 'Enrollment created successfully.');

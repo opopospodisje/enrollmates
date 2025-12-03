@@ -21,6 +21,7 @@ use App\Http\Requests\StoreEnrollmentRequest;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -191,6 +192,54 @@ class StudentController extends Controller
             'students' => $students,
             'applicants' => [],
             'pendingApplicants' => $pendingApplicants,
+        ]);
+    }
+
+    public function teacherShow(Student $student)
+    {
+        $user = Auth::user();
+        $teacherId = $user?->teacher?->id;
+
+        $classGroupIds = ClassGroupSubject::where('teacher_id', $teacherId)
+            ->pluck('class_group_id');
+
+        $hasEnrollment = Enrollment::where('student_id', $student->id)
+            ->whereIn('class_group_id', $classGroupIds)
+            ->exists();
+
+        if (!$hasEnrollment) {
+            abort(403);
+        }
+
+        $latestEnrollment = Enrollment::where('student_id', $student->id)
+            ->with(['classGroup.section.gradeLevel', 'classGroup.schoolYear'])
+            ->orderByDesc('enrolled_at')
+            ->first();
+
+        $studentData = [
+            'id' => $student->id,
+            'applicant_id' => $student->applicant_id ?? null,
+            'lrn' => $student->lrn ?? null,
+            'first_name' => $student->first_name,
+            'last_name' => $student->last_name,
+            'middle_name' => $student->middle_name,
+            'suffix' => $student->suffix,
+            'email' => $student->email,
+            'address' => $student->address,
+            'contact_number' => $student->contact_number,
+            'gender' => $student->gender,
+            'birthdate' => $student->birthdate,
+            'full_name' => trim("{$student->last_name}, {$student->first_name} " . ($student->middle_name ?? '') . ' ' . ($student->suffix ?? '')),
+            'current_class_name' => $latestEnrollment ? sprintf(
+                '%s - %s (%s)',
+                optional($latestEnrollment->classGroup->section->gradeLevel)->name,
+                optional($latestEnrollment->classGroup->section)->name,
+                optional($latestEnrollment->classGroup->schoolYear)->name
+            ) : null,
+        ];
+
+        return inertia('teacher/student/show', [
+            'student' => $studentData,
         ]);
     }
 
@@ -388,7 +437,11 @@ class StudentController extends Controller
         optional($student->applicant)->update(['status' => 'accepted']);
 
         $actor = Auth::user();
-        if ($actor && $actor->hasRole('teacher')) {
+        $role = $actor ? DB::table('model_has_roles')
+            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('model_has_roles.model_id', $actor->id)
+            ->value('roles.name') : null;
+        if ($role === 'teacher') {
             return redirect()->route('teacher.students.index')->with('success', 'Student created successfully.');
         }
         return redirect()->route('admin.students.index')->with('success', 'Student created successfully.');
@@ -397,20 +450,53 @@ class StudentController extends Controller
     /**
      * Display the specified resource.
      */
+    public function show(Student $student)
+    {
+        $latestEnrollment = Enrollment::where('student_id', $student->id)
+            ->with(['classGroup.section.gradeLevel', 'classGroup.schoolYear'])
+            ->orderByDesc('enrolled_at')
+            ->first();
+
+        $studentData = [
+            'id' => $student->id,
+            'applicant_id' => $student->applicant_id ?? null,
+            'lrn' => $student->lrn ?? null,
+            'first_name' => $student->first_name,
+            'last_name' => $student->last_name,
+            'middle_name' => $student->middle_name,
+            'suffix' => $student->suffix,
+            'email' => $student->email,
+            'address' => $student->address,
+            'contact_number' => $student->contact_number,
+            'gender' => $student->gender,
+            'birthdate' => $student->birthdate,
+            'full_name' => trim("{$student->last_name}, {$student->first_name} " . ($student->middle_name ?? '') . ' ' . ($student->suffix ?? '')),
+            'current_class_name' => $latestEnrollment ? sprintf(
+                '%s - %s (%s)',
+                optional($latestEnrollment->classGroup->section->gradeLevel)->name,
+                optional($latestEnrollment->classGroup->section)->name,
+                optional($latestEnrollment->classGroup->schoolYear)->name
+            ) : null,
+        ];
+
+        return inertia('admin/student/show', [
+            'student' => $studentData,
+        ]);
+    }
 
     public function studentHomePage()
     {
         $settings = SchoolSettings::all();
 
-        $student = auth()->user()
-            ->student()
-            ->with([
+        $user = Auth::user();
+        $student = $user
+            ? Student::with([
                 'user',
                 'applicant',
                 'enrollments.classGroup.section.gradeLevel',
                 'enrollments.classGroup.schoolYear',
-            ])
-            ->first();
+            ])->where('user_id', $user->id)->first()
+            : null;
 
         // Default
         $isFreshmen = false;
@@ -511,16 +597,17 @@ class StudentController extends Controller
 
         $settings = SchoolSettings::all();
 
-        // Get the logged-in student
-        $student = auth()->user()->student;
+        $user = Auth::user();
+        $student = $user ? Student::where('user_id', $user->id)->first() : null;
 
-        // Load enrollments with grades + subject + teacher + section + gradeLevel + schoolYear
-        $student->load([
-            'enrollments.grades.classGroupSubject.subject',
-            'enrollments.grades.classGroupSubject.teacher',
-            'enrollments.classGroup.section.gradeLevel',
-            'enrollments.classGroup.schoolYear',
-        ]);
+        if ($student) {
+            $student->load([
+                'enrollments.grades.classGroupSubject.subject',
+                'enrollments.grades.classGroupSubject.teacher',
+                'enrollments.classGroup.section.gradeLevel',
+                'enrollments.classGroup.schoolYear',
+            ]);
+        }
 
         return inertia('student/grade/index', [
             'student' => $student,
@@ -530,7 +617,7 @@ class StudentController extends Controller
 
     public function profile()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $student = $user->student;
 
@@ -663,8 +750,8 @@ class StudentController extends Controller
 
     public function createEnrollment()
     {
-        $user = auth()->user();
-        $student = $user->student;
+        $user = Auth::user();
+        $student = $user ? Student::where('user_id', $user->id)->first() : null;
 
         // Get the active school year
         $activeSchoolYear = SchoolYear::where('is_active', true)->first();

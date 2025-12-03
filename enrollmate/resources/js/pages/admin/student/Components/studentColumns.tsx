@@ -1,14 +1,3 @@
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import {
-  ArrowDown01,
-  ArrowDown10,
-  ArrowDownAZ,
-  ArrowDownZA,
-  Eye,
-  Trash2,
-} from "lucide-react";
-import { Link } from '@inertiajs/react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +9,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Link } from '@inertiajs/react';
 import { ColumnDef } from "@tanstack/react-table";
+import {
+  ArrowDown01,
+  ArrowDown10,
+  ArrowDownAZ,
+  ArrowDownZA,
+  Eye,
+  Trash2,
+} from "lucide-react";
 import EditStudentDialog from "./EditStudentDialog";
 
 type Applicant = {
@@ -38,7 +38,7 @@ type Applicant = {
 type Student = {
   id: number;
   user_id: number;
-  applicant_id: number;
+  applicant_id: number | null;
 
   lrn: string;
   full_name: string;
@@ -54,6 +54,9 @@ type Student = {
   birthdate: string;
 
   current_class_name:string;
+  has_special_needs: boolean;
+  special_needs_type: string;
+  is_4ps: boolean;
 };
 
 
@@ -196,6 +199,9 @@ export const getColumns = ({
         const student = row.original;
         return (
           <div className="flex justify-center gap-2">
+            <Link href={route('admin.students.show', student.id)}>
+              <Button variant={'outline'}><Eye /></Button>
+            </Link>
             <EditStudentDialog student={student} applicants={applicants} />
             <AlertDialog>
               <AlertDialogTrigger asChild><Button variant={'outline'} className='text-red-600'><Trash2 /></Button></AlertDialogTrigger>

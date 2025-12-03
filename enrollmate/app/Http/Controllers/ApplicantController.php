@@ -9,6 +9,7 @@ use App\Http\Requests\StoreApplicantRequest;
 use App\Http\Requests\UpdateApplicantRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ApplicantController extends Controller
 {
@@ -112,7 +113,11 @@ class ApplicantController extends Controller
         Applicant::create($validatedData);
 
         $user = Auth::user();
-        if ($user && $user->hasRole('teacher')) {
+        $role = $user ? DB::table('model_has_roles')
+            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('model_has_roles.model_id', $user->id)
+            ->value('roles.name') : null;
+        if ($role === 'teacher') {
             return redirect()->route('teacher.applicants.index')->with('success', 'Applicant created successfully.');
         }
         return redirect()->route('admin.applicants.index')->with('success', 'Applicant created successfully.');
