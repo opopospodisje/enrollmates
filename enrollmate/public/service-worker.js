@@ -1,4 +1,4 @@
-const CACHE_NAME = 'enrollmate-static-v2';
+const CACHE_NAME = 'enrollmate-static-v3';
 const OFFLINE_URLS = [
   'favicon.ico',
   'favicon.svg',

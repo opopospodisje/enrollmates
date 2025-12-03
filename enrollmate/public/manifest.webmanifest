@@ -2,11 +2,11 @@
   "name": "Enrollmate",
   "short_name": "Enrollmate",
   "description": "Enrollment management portal",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/login",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "theme_color": "#6f2222",
   "lang": "en",
   "icons": [
     {
