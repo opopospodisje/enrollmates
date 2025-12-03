@@ -53,9 +53,10 @@ type CreateApplicantDialogProps = {
   gradeLevels: GradeLevel[]; 
   schoolYears: SchoolYear[];
   currentSchoolYear: SchoolYear | null;
+  postRoute?: string;
 };
 
-const CreateApplicantDialog = ({gradeLevels,schoolYears,currentSchoolYear }: CreateApplicantDialogProps) => {
+const CreateApplicantDialog = ({gradeLevels,schoolYears,currentSchoolYear, postRoute = 'admin.applicants.store' }: CreateApplicantDialogProps) => {
   const [open, setOpen] = useState(false);
 
   const getDefaultApplicantFormData = (): Applicant => ({
@@ -82,7 +83,7 @@ const CreateApplicantDialog = ({gradeLevels,schoolYears,currentSchoolYear }: Cre
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    post(route('admin.applicants.store'), {
+    post(route(postRoute), {
       onSuccess: () => {
         toast.success('Applicant created!');
         setData(getDefaultApplicantFormData());

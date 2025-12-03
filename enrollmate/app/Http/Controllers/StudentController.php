@@ -22,6 +22,7 @@ use App\Http\Requests\StoreEnrollmentRequest;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 
 class StudentController extends Controller
@@ -129,6 +130,67 @@ class StudentController extends Controller
             'selectedLevel' => $selectedLevel,
             'selectedSection' => $selectedSection,
             'selectedGender' => $selectedGender,
+        ]);
+    }
+
+    public function teacherIndex(Request $request)
+    {
+        $user = Auth::user();
+        $teacher = $user?->teacher;
+
+        $filter = $request->query('filter', 'all');
+
+        $classGroupIds = ClassGroupSubject::where('teacher_id', $teacher?->id)
+            ->pluck('class_group_id');
+
+        $studentsQuery = Student::select(
+            'id','user_id','applicant_id','lrn',
+            'first_name','last_name','middle_name','suffix',
+            'email','contact_number','address','gender','birthdate'
+        )->where('is_graduated', false)
+         ->whereHas('enrollments', function ($q) use ($classGroupIds) {
+             $q->whereIn('class_group_id', $classGroupIds);
+         });
+
+        $students = $studentsQuery->get()->map(function ($student) {
+            $currentEnrollment = $student->enrollments()
+                ->whereHas('classGroup.schoolYear', fn($q) => $q->where('is_active', true))
+                ->with('classGroup.section.gradeLevel', 'classGroup.schoolYear')
+                ->first();
+
+            return [
+                'id' => $student->id,
+                'applicant_id' => $student->applicant_id,
+                'lrn' => $student->lrn,
+                'first_name' => $student->first_name,
+                'last_name' => $student->last_name,
+                'middle_name' => $student->middle_name,
+                'suffix' => $student->suffix,
+                'address' => $student->address,
+                'birthdate' => $student->birthdate,
+                'gender' => $student->gender,
+                'full_name' => trim($student->last_name . ', ' . $student->first_name . ' ' . ($student->middle_name ?? '') . ' ' . ($student->suffix ?? '')),
+                'email' => $student->email,
+                'contact_number' => $student->contact_number,
+                'current_class_name' => $currentEnrollment 
+                    ? sprintf(
+                        '%s - %s (%s)',
+                        $currentEnrollment->classGroup->section->gradeLevel->name ?? 'No Grade',
+                        $currentEnrollment->classGroup->section->name ?? 'No Section',
+                        $currentEnrollment->classGroup->schoolYear->name ?? 'No SY'
+                    )
+                    : null,
+            ];
+        });
+
+        $pendingApplicants = Applicant::select('id', 'first_name', 'last_name', 'middle_name', 'suffix','email','contact_number','address','birthdate','gender')
+            ->where('status', 'pending')
+            ->get();
+
+        return inertia('teacher/student/index', [
+            'students' => $students,
+            'applicants' => [],
+            'pendingApplicants' => $pendingApplicants,
         ]);
     }
 
@@ -325,6 +387,10 @@ class StudentController extends Controller
 
         optional($student->applicant)->update(['status' => 'accepted']);
 
+        $actor = Auth::user();
+        if ($actor && $actor->hasRole('teacher')) {
+            return redirect()->route('teacher.students.index')->with('success', 'Student created successfully.');
+        }
         return redirect()->route('admin.students.index')->with('success', 'Student created successfully.');
     }
 

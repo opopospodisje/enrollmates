@@ -66,6 +66,11 @@ const teacherSidebar: SidebarConfig = {
   dashboard: [
     { title: "Dashboard", href: "/teacher/dashboard", icon: LayoutGrid },
   ],
+  student: [
+    { title: "Enrollment", href: "/teacher/enrollments", icon: ListPlus },
+    { title: "Applicants", href: "/teacher/applicants", icon: BookUp2 },
+    { title: "Students", href: "/teacher/students", icon: UserRound },
+  ],
   class: [
     { title: "My Students", href: "/teacher/grades", icon: GraduationCap },
     { title: "My Subjects", href: "/teacher/subjects", icon: NotebookText },
