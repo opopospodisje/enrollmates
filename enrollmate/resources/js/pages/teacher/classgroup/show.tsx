@@ -1,12 +1,13 @@
-import {type BreadcrumbItem } from '@/types';
+import { Button } from "@/components/ui/button";
+import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Toaster } from '@/components/ui/sonner';
 import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, CornerDownRight, Layers, Table2 } from 'lucide-react';
-import * as React from "react"
-import { Button } from "@/components/ui/button"
-import { Toaster } from '@/components/ui/sonner';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import EditGradeLevelDialog from './Components/EditClassGroupDialog';
+import * as React from "react";
+import route from 'ziggy-js';
+import EditGradeLevelDialog from '../../admin/gradelevel/Components/EditGradeLevelDialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {

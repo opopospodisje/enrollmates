@@ -6,7 +6,7 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Toaster } from '@/components/ui/sonner';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import EditGradeLevelDialog from './Components/EditClassGroupDialog';
+import EditGradeLevelDialog from '../gradelevel/Components/EditGradeLevelDialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
