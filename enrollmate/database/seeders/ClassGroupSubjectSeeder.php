@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\ClassGroup;
+use App\Models\ClassGroupSubject;
 use App\Models\Subject;
 use App\Models\Teacher;
-use App\Models\ClassGroupSubject;
+use Illuminate\Database\Seeder;
 
 class ClassGroupSubjectSeeder extends Seeder
 {
@@ -18,13 +17,15 @@ class ClassGroupSubjectSeeder extends Seeder
 
         if ($teachers->count() === 0) {
             $this->command->error('No teachers found. Please run TeacherSeeder first.');
+
             return;
         }
 
         foreach ($classGroups as $classGroup) {
             // Skip if section or gradeLevel is missing
-            if (!$classGroup->section || !$classGroup->section->gradeLevel) {
+            if (! $classGroup->section || ! $classGroup->section->gradeLevel) {
                 $this->command->warn("ClassGroup ID {$classGroup->id} has missing section or gradeLevel. Skipping.");
+
                 continue;
             }
 

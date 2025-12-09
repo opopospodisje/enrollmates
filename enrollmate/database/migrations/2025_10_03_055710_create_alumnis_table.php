@@ -20,7 +20,7 @@ return new class extends Migration
                 'unemployed',
                 'self-employed',
                 'student',
-                'retired'
+                'retired',
             ])->nullable();
             $table->string('job_title')->nullable();
             $table->text('work_history')->nullable();

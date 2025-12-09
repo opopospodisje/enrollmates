@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Section;
-use App\Models\GradeLevel;
-use App\Models\SchoolYear;
-use App\Models\ClassGroup;
 use App\Http\Requests\StoreSectionRequest;
 use App\Http\Requests\UpdateSectionRequest;
+use App\Models\ClassGroup;
+use App\Models\GradeLevel;
+use App\Models\SchoolYear;
+use App\Models\Section;
 use Illuminate\Http\Request;
 
 class SectionController extends Controller
@@ -27,7 +27,7 @@ class SectionController extends Controller
                     'grade_level_id' => $section->grade_level_id,
                     'grade_level_name' => $section->gradeLevel->name ?? 'N/A',
                     'cutoff_grade' => $section->cutoff_grade,
-                    'is_special' =>$section->is_special,
+                    'is_special' => $section->is_special,
                 ];
             });
 
@@ -110,7 +110,7 @@ class SectionController extends Controller
 
     public function bulkDelete(Request $request)
     {
-        //dd($request->all());
+        // dd($request->all());
         $ids = $request->input('ids');
 
         if (empty($ids)) {

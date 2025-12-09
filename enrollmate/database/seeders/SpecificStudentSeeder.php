@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Applicant;
-use App\Models\Student;
-use App\Models\SchoolYear;
 use App\Models\ClassGroup;
-use App\Models\Enrollment;
 use App\Models\ClassGroupSubject;
+use App\Models\Enrollment;
 use App\Models\Grade;
 use App\Models\GradeLevel;
+use App\Models\SchoolYear;
+use App\Models\Student;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class SpecificStudentSeeder extends Seeder
 {
@@ -19,19 +19,20 @@ class SpecificStudentSeeder extends Seeder
     {
         // Define grade levels and corresponding school years
         $gradeLevels = [
-            'Grade 7' =>    '2020–2021',
-            'Grade 8' =>    '2021–2022',
-            'Grade 9' =>    '2022–2023',
-            'Grade 10' =>   '2023–2024',
-            'Grade 11' =>   '2024–2025',
-            'Grade 12' =>   '2025–2026',
+            'Grade 7' => '2020–2021',
+            'Grade 8' => '2021–2022',
+            'Grade 9' => '2022–2023',
+            'Grade 10' => '2023–2024',
+            'Grade 11' => '2024–2025',
+            'Grade 12' => '2025–2026',
         ];
 
         // Create the applicant with fixed info
         $schoolYearForApplicant = SchoolYear::where('name', '2025–2026')->first();
 
-        if (!$schoolYearForApplicant) {
+        if (! $schoolYearForApplicant) {
             $this->command->error('Active school year (2025–2026) not found.');
+
             return;
         }
 
@@ -79,25 +80,28 @@ class SpecificStudentSeeder extends Seeder
             $schoolYear = SchoolYear::where('name', $yearName)->first();
             $gradeLevel = GradeLevel::where('name', $gradeName)->first();
 
-            if (!$schoolYear) {
+            if (! $schoolYear) {
                 $this->command->error("School year '{$yearName}' not found. Skipping $gradeName enrollment.");
+
                 continue;
             }
 
-            if (!$gradeLevel) {
+            if (! $gradeLevel) {
                 $this->command->error("Grade level '{$gradeName}' not found. Skipping enrollment for {$yearName}.");
+
                 continue;
             }
 
             // Find class group for this grade level and school year
             $classGroup = ClassGroup::whereHas('section', function ($q) use ($gradeLevel) {
-                    $q->where('grade_level_id', $gradeLevel->id);
-                })
+                $q->where('grade_level_id', $gradeLevel->id);
+            })
                 ->where('school_year_id', $schoolYear->id)
                 ->first();
 
-            if (!$classGroup) {
+            if (! $classGroup) {
                 $this->command->error("No class group found for grade {$gradeName} in school year {$yearName}. Skipping.");
+
                 continue;
             }
 
@@ -120,7 +124,7 @@ class SpecificStudentSeeder extends Seeder
                 $second_quarter = rand(75, 95);
                 $third_quarter = rand(75, 95);
                 $fourth_quarter = rand(75, 95);
-                
+
                 $final_grade = ($first_quarter + $second_quarter + $third_quarter + $fourth_quarter) / 4;
 
                 Grade::create([

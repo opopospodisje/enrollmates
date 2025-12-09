@@ -11,35 +11,33 @@ class AlumniController extends Controller
     /**
      * Display a listing of the resource.
      */
-        public function index()
-        {
-            // Fetch alumni records with the related student information
-            $alumnis = Alumni::with('student:id,first_name,last_name,suffix,middle_name,lrn')
-                            ->select('id', 'student_id', 'year_graduated','employment_status')
-                            ->get();
+    public function index()
+    {
+        // Fetch alumni records with the related student information
+        $alumnis = Alumni::with('student:id,first_name,last_name,suffix,middle_name,lrn')
+            ->select('id', 'student_id', 'year_graduated', 'employment_status')
+            ->get();
 
-            // Map the alumni data to a flat structure and add the full_name field
-            $flattenedAlumnis = $alumnis->map(function ($alumni) {
-                // Combine first_name, middle_name, last_name, and suffix to form full_name
-                $fullName = trim("{$alumni->student->first_name} {$alumni->student->middle_name} {$alumni->student->last_name} {$alumni->student->suffix}");
+        // Map the alumni data to a flat structure and add the full_name field
+        $flattenedAlumnis = $alumnis->map(function ($alumni) {
+            // Combine first_name, middle_name, last_name, and suffix to form full_name
+            $fullName = trim("{$alumni->student->first_name} {$alumni->student->middle_name} {$alumni->student->last_name} {$alumni->student->suffix}");
 
-                return [
-                    'id' => $alumni->id,
-                    'student_id' => $alumni->student_id,
-                    'year_graduated' => $alumni->year_graduated,
-                    'lrn' => $alumni->student->lrn,
-                    'full_name' => $fullName,  // Adding the full_name field
-                    'employment_status' => $alumni->employment_status ?? 'Awaiting Update',
-                ];
-            });
+            return [
+                'id' => $alumni->id,
+                'student_id' => $alumni->student_id,
+                'year_graduated' => $alumni->year_graduated,
+                'lrn' => $alumni->student->lrn,
+                'full_name' => $fullName,  // Adding the full_name field
+                'employment_status' => $alumni->employment_status ?? 'Awaiting Update',
+            ];
+        });
 
-            // Return the flattened data to the frontend
-            return inertia('admin/alumni/index', [
-                'alumnis' => $flattenedAlumnis,
-            ]);
-        }
-
-
+        // Return the flattened data to the frontend
+        return inertia('admin/alumni/index', [
+            'alumnis' => $flattenedAlumnis,
+        ]);
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -89,14 +87,13 @@ class AlumniController extends Controller
         //
     }
 
-
     public function alumniInfo()
     {
         // Get the authenticated user
         $user = Auth::user();
 
         // Check if the user is a student and has a related student record
-        if (!$user || !$user->student) {
+        if (! $user || ! $user->student) {
             abort(403, 'Unauthorized or student record not found.');
         }
 
@@ -107,7 +104,7 @@ class AlumniController extends Controller
         $alumni = $student->alumni;
 
         // Check if alumni record exists
-        if (!$alumni) {
+        if (! $alumni) {
             abort(404, 'Alumni record not found.');
         }
 
@@ -142,14 +139,14 @@ class AlumniController extends Controller
 
         $user = Auth::user();
 
-        if (!$user || !$user->student) {
+        if (! $user || ! $user->student) {
             abort(403, 'Unauthorized or student record not found.');
         }
 
         $student = $user->student;
         $alumni = $student->alumni;
 
-        if (!$alumni) {
+        if (! $alumni) {
             abort(404, 'Alumni record not found.');
         }
 
@@ -169,6 +166,4 @@ class AlumniController extends Controller
 
         return redirect()->route('student.alumnis.show')->with('success', 'Alumni info updated.');
     }
-
-
 }

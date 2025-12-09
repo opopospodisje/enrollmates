@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GradeLevel;
 use App\Http\Requests\StoreGradeLevelRequest;
 use App\Http\Requests\UpdateGradeLevelRequest;
+use App\Models\GradeLevel;
 use Illuminate\Http\Request;
 
 class GradeLevelController extends Controller
@@ -14,7 +14,8 @@ class GradeLevelController extends Controller
      */
     public function index()
     {
-        $gradeLevel = GradeLevel::select( 'id', 'name')->get();
+        $gradeLevel = GradeLevel::select('id', 'name')->get();
+
         return inertia('admin/gradelevel/index', [
             'gradeLevels' => $gradeLevel,
         ]);
@@ -46,7 +47,7 @@ class GradeLevelController extends Controller
     public function show(GradeLevel $gradeLevel)
     {
         // Assuming you want to return a view with the grade level details
-        //$gradeLevel->load();
+        // $gradeLevel->load();
 
         return inertia('gradelevel/show', [
             'gradeLevel' => $gradeLevel,
@@ -81,7 +82,7 @@ class GradeLevelController extends Controller
 
     public function bulkDelete(Request $request)
     {
-        //dd($request->all());
+        // dd($request->all());
         $ids = $request->input('ids');
 
         if (empty($ids)) {

@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Section;
 use App\Models\GradeLevel;
+use App\Models\Section;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<Section>

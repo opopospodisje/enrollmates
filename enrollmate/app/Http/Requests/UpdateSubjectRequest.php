@@ -22,7 +22,7 @@ class UpdateSubjectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => 'required|string|max:10|unique:subjects,code,' . $this->subject->id,
+            'code' => 'required|string|max:10|unique:subjects,code,'.$this->subject->id,
             'name' => 'required|string|max:255',
             'is_special' => 'boolean',
         ];

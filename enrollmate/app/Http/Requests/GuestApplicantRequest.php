@@ -27,4 +27,3 @@ class GuestApplicantRequest extends FormRequest
         ];
     }
 }
-

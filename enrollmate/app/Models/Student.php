@@ -27,14 +27,12 @@ class Student extends Model
 
         'is_graduated',
 
-        
         // NEW
         'has_special_needs',
         'special_needs_type',
 
         'is_4ps',
     ];
-
 
     public function user()
     {

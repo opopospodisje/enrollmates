@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\LoginInfo;
 use Illuminate\Http\Request;
-use Jenssegers\Agent\Agent;
-use Carbon\Carbon;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
+use Jenssegers\Agent\Agent;
 
 class LoginInfoController extends Controller
 {
@@ -35,20 +34,19 @@ class LoginInfoController extends Controller
         });
 
         return Inertia::render('admin/login_infos/index', [
-            'logs' => $formattedLogs
+            'logs' => $formattedLogs,
         ]);
     }
 
     /**
      * Handle the login attempt and log the information.
      *
-     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function logLoginAttempt(Request $request)
     {
         $credentials = $request->only('email', 'password');
-        $agent = new Agent();
+        $agent = new Agent;
 
         // Log login attempt (status will be 'pending' until authentication is done)
         try {
@@ -62,9 +60,10 @@ class LoginInfoController extends Controller
             ]);
         } catch (\Exception $e) {
             // Log the error to see what happened
-            \Log::error('Error creating login info: ' . $e->getMessage());
+            \Log::error('Error creating login info: '.$e->getMessage());
+
             return response()->json([
-                'error_msg' => "There was an error logging the login attempt."
+                'error_msg' => 'There was an error logging the login attempt.',
             ]);
         }
 
@@ -87,7 +86,7 @@ class LoginInfoController extends Controller
             $this->updateLoginStatus($request->email, 'failed', $request->ip());
 
             return response()->json([
-                'error_msg' => "Invalid email or password, please try again."
+                'error_msg' => 'Invalid email or password, please try again.',
             ]);
         }
     }
@@ -95,19 +94,19 @@ class LoginInfoController extends Controller
     /**
      * Update the status of the login attempt after checking the email and IP address.
      *
-     * @param string $email
-     * @param string $status
-     * @param string $ipAddress
+     * @param  string  $email
+     * @param  string  $status
+     * @param  string  $ipAddress
      * @return void
      */
     private function updateLoginStatus($email, $status, $ipAddress)
     {
         // Find the latest "pending" login record for the email and IP
         $loginInfo = LoginInfo::where('email', $email)
-                              ->where('ip_address', $ipAddress)
-                              ->where('status', 'pending')
-                              ->latest()
-                              ->first();
+            ->where('ip_address', $ipAddress)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
 
         if ($loginInfo) {
             $loginInfo->update([

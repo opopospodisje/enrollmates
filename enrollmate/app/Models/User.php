@@ -6,13 +6,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
-use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements AuditableContract
 {
-    use Auditable, HasRoles, HasFactory, Notifiable;
+    use Auditable, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -52,11 +52,9 @@ class User extends Authenticatable implements AuditableContract
         ];
     }
 
-
     /**
      * Get the teacher associated with the user.
      */
-
     public function teacher()
     {
         return $this->hasOne(Teacher::class);

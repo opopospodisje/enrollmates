@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Room;
-use App\Models\RoomType;
-use App\Models\FileAttachment;
 use App\Http\Requests\StoreRoomRequest;
 use App\Http\Requests\UpdateRoomRequest;
-use Inertia\Inertia;
+use App\Models\FileAttachment;
+use App\Models\Room;
+use App\Models\RoomType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Tinify\Tinify;
+use Inertia\Inertia;
 use Tinify\Exception as TinifyException;
 use Tinify\Source;
 
@@ -22,7 +21,7 @@ class RoomController extends Controller
      */
     public function index()
     {
-        $rooms = Room::select('id', 'image', 'name', 'view', 'size', 'room_type_id','sub_room_of', 'capacity', 'price', 'number_of_bed', 'description','featured','is_active')
+        $rooms = Room::select('id', 'image', 'name', 'view', 'size', 'room_type_id', 'sub_room_of', 'capacity', 'price', 'number_of_bed', 'description', 'featured', 'is_active')
             ->with('roomType:id,name', 'fileAttachments:id,file_name,file_path,file_type')
             ->get()
             ->map(function ($room) {
@@ -45,7 +44,7 @@ class RoomController extends Controller
                         return [
                             'id' => $attachment->id,
                             'file_name' => $attachment->file_name,
-                            'file_path' => asset('storage/' . $attachment->file_path),
+                            'file_path' => asset('storage/'.$attachment->file_path),
                             'file_type' => $attachment->file_type,
                         ];
                     }),
@@ -58,13 +57,12 @@ class RoomController extends Controller
             'rooms' => $rooms,
             'roomTypes' => RoomType::all(),
 
-            'allRooms' => $allRooms->map(fn($r) => [
+            'allRooms' => $allRooms->map(fn ($r) => [
                 'id' => $r->id,
                 'name' => $r->name,
             ]),
         ]);
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -91,6 +89,7 @@ class RoomController extends Controller
 
         return redirect()->back()->with('success', 'Room created successfully.');
     }
+
     /**
      * Display the specified resource.
      */
@@ -98,7 +97,7 @@ class RoomController extends Controller
     {
         $room->load(['bookings', 'roomType', 'fileAttachments', 'parentRoom']);
 
-        //dd($room);
+        // dd($room);
 
         $bookings = $room->bookings->map(function ($booking) use ($room) {
             return [
@@ -131,7 +130,7 @@ class RoomController extends Controller
                     return [
                         'id' => $attachment->id,
                         'file_name' => $attachment->file_name,
-                        'file_path' => asset('storage/' . $attachment->file_path),
+                        'file_path' => asset('storage/'.$attachment->file_path),
                         'file_type' => $attachment->file_type,
                     ];
                 }),
@@ -139,15 +138,13 @@ class RoomController extends Controller
             'bookings' => $bookings,
             'roomTypes' => RoomType::all(),
 
-            'allRooms' => $allRooms->map(fn($r) => [
+            'allRooms' => $allRooms->map(fn ($r) => [
                 'id' => $r->id,
                 'name' => $r->name,
             ]),
 
         ]);
     }
-
-
 
     /**
      * Show the form for editing the specified resource.
@@ -194,12 +191,13 @@ class RoomController extends Controller
     public function destroy(Room $room)
     {
         $room->delete();
+
         return redirect()->route('rooms.index')->with('success', 'Room deleted successfully.');
     }
 
     public function bulkDelete(Request $request)
     {
-        //dd($request->all());
+        // dd($request->all());
         $ids = $request->input('ids');
 
         if (empty($ids)) {
@@ -223,7 +221,7 @@ class RoomController extends Controller
             $tempPath = $file->storeAs('tmp', $generatedName);
             $fullTempPath = Storage::disk('local')->path($tempPath);
 
-            if (!Storage::exists($tempPath)) {
+            if (! Storage::exists($tempPath)) {
                 throw new \Exception("Temp file was not saved: {$tempPath}");
             }
 
@@ -237,7 +235,7 @@ class RoomController extends Controller
                     Storage::disk('public')->put($filePath, Storage::get($tempPath));
                 }
             } catch (TinifyException $e) {
-                logger()->error('Tinify compression failed: ' . $e->getMessage());
+                logger()->error('Tinify compression failed: '.$e->getMessage());
                 Storage::disk('public')->put($filePath, Storage::get($tempPath));
             } finally {
                 Storage::delete($tempPath);
@@ -252,5 +250,4 @@ class RoomController extends Controller
             $room->fileAttachments()->attach($attachment->id);
         }
     }
-
 }

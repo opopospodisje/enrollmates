@@ -13,7 +13,7 @@ class Applicant extends Model
     protected $casts = [
         'exam_taken_at' => 'datetime',
     ];
-    
+
     protected $fillable = [
         'first_name',
         'middle_name',

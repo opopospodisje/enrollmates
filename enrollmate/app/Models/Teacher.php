@@ -21,6 +21,7 @@ class Teacher extends Model
         'contact_number',
         'gender',
         'birthdate',
+        'is_archived',
     ];
 
     public function user()

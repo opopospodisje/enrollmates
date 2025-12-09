@@ -1,26 +1,28 @@
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
 import {
-  ArrowDown01,
-  ArrowDown10,
-  ArrowDownAZ,
-  ArrowDownZA,
-  Eye,
-  Trash2,
-} from "lucide-react";
-import { Link } from '@inertiajs/react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Link } from '@inertiajs/react';
 import { ColumnDef } from "@tanstack/react-table";
+import {
+    Archive,
+    ArchiveRestore,
+    ArrowDown01,
+    ArrowDown10,
+    ArrowDownAZ,
+    ArrowDownZA,
+    Eye,
+} from "lucide-react";
 import EditTeacherDialog from "./EditTeacherDialog";
 
 type Teacher = {
@@ -39,8 +41,12 @@ type Teacher = {
 
 export const getColumns = ({
   handleDelete,
+  handleUnarchive,
+  isArchived,
 }: {
   handleDelete: (id: number) => void;
+  handleUnarchive: (id: number) => void;
+  isArchived: boolean;
 }): ColumnDef<Teacher>[] => [
 
     {
@@ -227,23 +233,56 @@ export const getColumns = ({
         const teacher = row.original;
         return (
           <div className="flex justify-center gap-2">
-            <Link href={`/teachers/${teacher.id}/show`}><Button variant={'outline'}><Eye /></Button></Link>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href={route('admin.teachers.show', teacher.id)}><Button variant={'outline'} aria-label="View teacher"><Eye /></Button></Link>
+              </TooltipTrigger>
+              <TooltipContent>View</TooltipContent>
+            </Tooltip>
             <EditTeacherDialog teacher={teacher} />
-            <AlertDialog>
-              <AlertDialogTrigger asChild><Button variant={'outline'} className='text-red-600'><Trash2 /></Button></AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription> Deleting this room type will permanently remove it.</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction>
-                    <div onClick={() => handleDelete(teacher.id)} className='w-full'>Delete</div>
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            {isArchived ? (
+              <AlertDialog>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AlertDialogTrigger asChild><Button variant={'outline'} aria-label="Restore teacher"><ArchiveRestore /></Button></AlertDialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Restore</TooltipContent>
+                </Tooltip>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Restore teacher?</AlertDialogTitle>
+                    <AlertDialogDescription> Restored teachers can log in again.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction>
+                      <div onClick={() => handleUnarchive(teacher.id)} className='w-full'>Restore</div>
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : (
+              <AlertDialog>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AlertDialogTrigger asChild><Button variant={'outline'} aria-label="Archive teacher"><Archive /></Button></AlertDialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Archive</TooltipContent>
+                </Tooltip>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Archive teacher?</AlertDialogTitle>
+                    <AlertDialogDescription> Archived teachers cannot log in.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction>
+                      <div onClick={() => handleDelete(teacher.id)} className='w-full'>Archive</div>
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         );
       },

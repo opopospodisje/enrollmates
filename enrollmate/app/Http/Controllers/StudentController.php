@@ -2,29 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Student;
-use App\Models\Applicant;
-use App\Models\SchoolYear;
-use App\Models\Enrollment;
-use App\Models\ClassGroup;
-use App\Models\ClassGroupSubject;
-use App\Models\GradeLevel;
-use App\Models\Grade;
-use App\Models\Section;
-use App\Models\User;
-use App\Models\SchoolSettings;
-use App\Models\Alumni;
-
+use App\Http\Requests\StoreEnrollmentRequest;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
-use App\Http\Requests\StoreEnrollmentRequest;
-
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
+use App\Models\Alumni;
+use App\Models\Applicant;
+use App\Models\ClassGroup;
+use App\Models\ClassGroupSubject;
+use App\Models\Enrollment;
+use App\Models\Grade;
+use App\Models\GradeLevel;
+use App\Models\SchoolSettings;
+use App\Models\SchoolYear;
+use App\Models\Section;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class StudentController extends Controller
 {
@@ -45,15 +41,15 @@ class StudentController extends Controller
         if ($selectedLevel !== 'allLevels') {
             $sectionsQuery->where('grade_level_id', $selectedLevel);
         }
-        
+
         $sections = $sectionsQuery->get();
 
         // Build query for students, with optional filters for grade level and section
         $studentsQuery = Student::select(
-            'id','user_id','applicant_id','lrn',
-            'first_name','last_name','middle_name','suffix',
-            'email','contact_number','address','gender','birthdate','has_special_needs','special_needs_type','is_4ps'
-        )->where('is_graduated',false);
+            'id', 'user_id', 'applicant_id', 'lrn',
+            'first_name', 'last_name', 'middle_name', 'suffix',
+            'email', 'contact_number', 'address', 'gender', 'birthdate', 'has_special_needs', 'special_needs_type', 'is_4ps'
+        )->where('is_graduated', false);
 
         // Filter by grade level if selected
         if ($selectedLevel !== 'allLevels') {
@@ -72,10 +68,10 @@ class StudentController extends Controller
         if ($selectedGender !== 'allGenders') {
             $studentsQuery->where('gender', $selectedGender);
         }
-        
+
         $students = $studentsQuery->get()->map(function ($student) {
             $currentEnrollment = $student->enrollments()
-                ->whereHas('classGroup.schoolYear', fn($q) => $q->where('is_active', true))
+                ->whereHas('classGroup.schoolYear', fn ($q) => $q->where('is_active', true))
                 ->with('classGroup.section.gradeLevel', 'classGroup.schoolYear')
                 ->first();
 
@@ -90,13 +86,13 @@ class StudentController extends Controller
                 'address' => $student->address,
                 'birthdate' => $student->birthdate,
                 'gender' => $student->gender,
-                'full_name' => trim($student->last_name . ', ' . $student->first_name . ' ' . ($student->middle_name ?? '') . ' ' . ($student->suffix ?? '')),
+                'full_name' => trim($student->last_name.', '.$student->first_name.' '.($student->middle_name ?? '').' '.($student->suffix ?? '')),
                 'email' => $student->email,
                 'contact_number' => $student->contact_number,
                 'has_special_needs' => $student->has_special_needs,
                 'special_needs_type' => $student->special_needs_type,
                 'is_4ps' => $student->is_4ps,
-                'current_class_name' => $currentEnrollment 
+                'current_class_name' => $currentEnrollment
                     ? sprintf(
                         '%s - %s (%s)',
                         $currentEnrollment->classGroup->section->gradeLevel->name ?? 'No Grade',
@@ -109,13 +105,13 @@ class StudentController extends Controller
 
         // Get all applicant IDs that are already linked to students
         $linkedApplicantIds = $students->pluck('applicant_id')->filter()->unique();
-        
-        $pendingApplicants = Applicant::select('id', 'first_name', 'last_name', 'middle_name', 'suffix','email','contact_number','address','birthdate','gender')
+
+        $pendingApplicants = Applicant::select('id', 'first_name', 'last_name', 'middle_name', 'suffix', 'email', 'contact_number', 'address', 'birthdate', 'gender')
             ->where('status', 'pending')
             ->get();
 
         // Get applicants that are either pending OR linked to students
-        $applicants = Applicant::select('id', 'first_name', 'last_name', 'middle_name', 'suffix','email','contact_number','address','birthdate','gender')
+        $applicants = Applicant::select('id', 'first_name', 'last_name', 'middle_name', 'suffix', 'email', 'contact_number', 'address', 'birthdate', 'gender')
             ->where(function ($query) use ($linkedApplicantIds) {
                 $query->where('status', 'pending')
                     ->orWhereIn('id', $linkedApplicantIds);
@@ -145,17 +141,17 @@ class StudentController extends Controller
             ->pluck('class_group_id');
 
         $studentsQuery = Student::select(
-            'id','user_id','applicant_id','lrn',
-            'first_name','last_name','middle_name','suffix',
-            'email','contact_number','address','gender','birthdate'
+            'id', 'user_id', 'applicant_id', 'lrn',
+            'first_name', 'last_name', 'middle_name', 'suffix',
+            'email', 'contact_number', 'address', 'gender', 'birthdate'
         )->where('is_graduated', false)
-         ->whereHas('enrollments', function ($q) use ($classGroupIds) {
-             $q->whereIn('class_group_id', $classGroupIds);
-         });
+            ->whereHas('enrollments', function ($q) use ($classGroupIds) {
+                $q->whereIn('class_group_id', $classGroupIds);
+            });
 
         $students = $studentsQuery->get()->map(function ($student) {
             $currentEnrollment = $student->enrollments()
-                ->whereHas('classGroup.schoolYear', fn($q) => $q->where('is_active', true))
+                ->whereHas('classGroup.schoolYear', fn ($q) => $q->where('is_active', true))
                 ->with('classGroup.section.gradeLevel', 'classGroup.schoolYear')
                 ->first();
 
@@ -170,10 +166,10 @@ class StudentController extends Controller
                 'address' => $student->address,
                 'birthdate' => $student->birthdate,
                 'gender' => $student->gender,
-                'full_name' => trim($student->last_name . ', ' . $student->first_name . ' ' . ($student->middle_name ?? '') . ' ' . ($student->suffix ?? '')),
+                'full_name' => trim($student->last_name.', '.$student->first_name.' '.($student->middle_name ?? '').' '.($student->suffix ?? '')),
                 'email' => $student->email,
                 'contact_number' => $student->contact_number,
-                'current_class_name' => $currentEnrollment 
+                'current_class_name' => $currentEnrollment
                     ? sprintf(
                         '%s - %s (%s)',
                         $currentEnrollment->classGroup->section->gradeLevel->name ?? 'No Grade',
@@ -184,7 +180,7 @@ class StudentController extends Controller
             ];
         });
 
-        $pendingApplicants = Applicant::select('id', 'first_name', 'last_name', 'middle_name', 'suffix','email','contact_number','address','birthdate','gender')
+        $pendingApplicants = Applicant::select('id', 'first_name', 'last_name', 'middle_name', 'suffix', 'email', 'contact_number', 'address', 'birthdate', 'gender')
             ->where('status', 'pending')
             ->get();
 
@@ -207,7 +203,7 @@ class StudentController extends Controller
             ->whereIn('class_group_id', $classGroupIds)
             ->exists();
 
-        if (!$hasEnrollment) {
+        if (! $hasEnrollment) {
             abort(403);
         }
 
@@ -229,7 +225,7 @@ class StudentController extends Controller
             'contact_number' => $student->contact_number,
             'gender' => $student->gender,
             'birthdate' => $student->birthdate,
-            'full_name' => trim("{$student->last_name}, {$student->first_name} " . ($student->middle_name ?? '') . ' ' . ($student->suffix ?? '')),
+            'full_name' => trim("{$student->last_name}, {$student->first_name} ".($student->middle_name ?? '').' '.($student->suffix ?? '')),
             'current_class_name' => $latestEnrollment ? sprintf(
                 '%s - %s (%s)',
                 optional($latestEnrollment->classGroup->section->gradeLevel)->name,
@@ -263,9 +259,9 @@ class StudentController extends Controller
 
         // Build query for special students, with optional filters for grade level, section, and gender
         $studentsQuery = Student::with([
-                'latestEnrollment.classGroup.section.gradeLevel',
-                'latestEnrollment.classGroup.schoolYear',
-            ])
+            'latestEnrollment.classGroup.section.gradeLevel',
+            'latestEnrollment.classGroup.schoolYear',
+        ])
             ->whereHas('latestEnrollment.classGroup.section', function ($q) {
                 $q->where('is_special', true);
             })
@@ -304,7 +300,7 @@ class StudentController extends Controller
                 'suffix' => $student->suffix,
                 'address' => $student->address,
                 'gender' => $student->gender,
-                'full_name' => trim($student->last_name . ', ' . $student->first_name . ' ' . ($student->middle_name ?? '') . ' ' . ($student->suffix ?? '')),
+                'full_name' => trim($student->last_name.', '.$student->first_name.' '.($student->middle_name ?? '').' '.($student->suffix ?? '')),
                 'email' => $student->email,
                 'contact_number' => $student->contact_number,
                 'current_class_name' => $enrollment
@@ -329,9 +325,9 @@ class StudentController extends Controller
         $regularStudentsQuery = Student::whereHas('latestEnrollment.classGroup.section', function ($q) {
             $q->where('is_special', false);
         })
-        ->orDoesntHave('latestEnrollment')
-        ->with(['latestEnrollment.classGroup.section'])
-        ->select('id', 'first_name', 'last_name', 'middle_name', 'suffix');
+            ->orDoesntHave('latestEnrollment')
+            ->with(['latestEnrollment.classGroup.section'])
+            ->select('id', 'first_name', 'last_name', 'middle_name', 'suffix');
 
         // Apply filters for regular students as well
         if ($selectedLevel !== 'allLevels') {
@@ -355,18 +351,18 @@ class StudentController extends Controller
 
         // Get all Class Groups (regular and special)
         $classGroups = ClassGroup::with([
-                'section.gradeLevel:id,name',
-                'schoolYear:id,name'
-            ])
-            ->whereHas('section', fn($q) => $q->where('is_special', false))
+            'section.gradeLevel:id,name',
+            'schoolYear:id,name',
+        ])
+            ->whereHas('section', fn ($q) => $q->where('is_special', false))
             ->get();
 
         // Get all Special Class Groups
         $specialClassGroups = ClassGroup::with([
-                'section.gradeLevel:id,name',
-                'schoolYear:id,name'
-            ])
-            ->whereHas('section', fn($q) => $q->where('is_special', true))
+            'section.gradeLevel:id,name',
+            'schoolYear:id,name',
+        ])
+            ->whereHas('section', fn ($q) => $q->where('is_special', true))
             ->get();
 
         return inertia('admin/specialStudent/index', [
@@ -397,7 +393,7 @@ class StudentController extends Controller
     {
         $validatedData = $request->validated();
 
-        //dd($validatedData);
+        // dd($validatedData);
         // Create the User first
         $user = User::create([
             'first_name' => $validatedData['first_name'],
@@ -444,6 +440,7 @@ class StudentController extends Controller
         if ($role === 'teacher') {
             return redirect()->route('teacher.students.index')->with('success', 'Student created successfully.');
         }
+
         return redirect()->route('admin.students.index')->with('success', 'Student created successfully.');
     }
 
@@ -470,7 +467,7 @@ class StudentController extends Controller
             'contact_number' => $student->contact_number,
             'gender' => $student->gender,
             'birthdate' => $student->birthdate,
-            'full_name' => trim("{$student->last_name}, {$student->first_name} " . ($student->middle_name ?? '') . ' ' . ($student->suffix ?? '')),
+            'full_name' => trim("{$student->last_name}, {$student->first_name} ".($student->middle_name ?? '').' '.($student->suffix ?? '')),
             'current_class_name' => $latestEnrollment ? sprintf(
                 '%s - %s (%s)',
                 optional($latestEnrollment->classGroup->section->gradeLevel)->name,
@@ -509,7 +506,7 @@ class StudentController extends Controller
             $gradeLevelName = optional($latestEnrollment->classGroup->section->gradeLevel)->name;
 
             $isFreshmen = $gradeLevelName === 'Grade 7';
-            $isGraduating = $gradeLevelName === 'Grade 12';            
+            $isGraduating = $gradeLevelName === 'Grade 12';
         }
 
         return inertia('student/home', [
@@ -527,6 +524,7 @@ class StudentController extends Controller
     {
         //
     }
+
     /**
      * Update the specified resource in storage.
      */
@@ -534,33 +532,33 @@ class StudentController extends Controller
     {
         // Update the student record
         $student->update([
-            'applicant_id'   => $request->applicant_id ?: null,
-            'lrn'            => $request->lrn,
-            'first_name'     => $request->first_name,
-            'last_name'      => $request->last_name,
-            'middle_name'    => $request->middle_name,
-            'suffix'         => $request->suffix,
-            'email'          => $request->email,
-            'address'        => $request->address,
+            'applicant_id' => $request->applicant_id ?: null,
+            'lrn' => $request->lrn,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'middle_name' => $request->middle_name,
+            'suffix' => $request->suffix,
+            'email' => $request->email,
+            'address' => $request->address,
             'contact_number' => $request->contact_number,
-            'gender'         => $request->gender,
-            'birthdate'      => $request->birthdate,
+            'gender' => $request->gender,
+            'birthdate' => $request->birthdate,
 
             // FIXED BOOLEAN FIELDS
-            'has_special_needs'   => (bool) $request->has_special_needs,
-            'special_needs_type'  => $request->has_special_needs 
-                                        ? $request->special_needs_type 
+            'has_special_needs' => (bool) $request->has_special_needs,
+            'special_needs_type' => $request->has_special_needs
+                                        ? $request->special_needs_type
                                         : null,
-            'is_4ps'              => (bool) $request->is_4ps,
+            'is_4ps' => (bool) $request->is_4ps,
         ]);
 
         // Also update the associated user
         if ($student->user) {
             $student->user->update([
-                'first_name'     => $request->first_name,
-                'last_name'      => $request->last_name,
-                'email'          => $request->email,
-                'address'        => $request->address,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'address' => $request->address,
                 'contact_number' => $request->contact_number,
             ]);
         }
@@ -580,7 +578,7 @@ class StudentController extends Controller
 
     public function bulkDelete(Request $request)
     {
-        //dd($request->all());
+        // dd($request->all());
         $ids = $request->input('ids');
 
         if (empty($ids)) {
@@ -621,7 +619,7 @@ class StudentController extends Controller
 
         $student = $user->student;
 
-        if (!$student) {
+        if (! $student) {
             abort(404, 'Student record not found.');
         }
 
@@ -637,7 +635,7 @@ class StudentController extends Controller
                 'address' => $student->address,
                 'birthdate' => $student->birthdate,
                 'gender' => $student->gender,
-                'full_name' => trim($student->last_name . ', ' . $student->first_name . ' ' . ($student->middle_name ?? '') . ' ' . ($student->suffix ?? '')),
+                'full_name' => trim($student->last_name.', '.$student->first_name.' '.($student->middle_name ?? '').' '.($student->suffix ?? '')),
                 'email' => $student->email,
                 'contact_number' => $student->contact_number,
             ],
@@ -650,13 +648,13 @@ class StudentController extends Controller
         $fields = [
             'id', 'user_id', 'applicant_id', 'lrn',
             'first_name', 'last_name', 'middle_name', 'suffix',
-            'email', 'contact_number', 'address', 'gender', 'birthdate'
+            'email', 'contact_number', 'address', 'gender', 'birthdate',
         ];
 
         // Fetch and format students
         $formatStudent = function ($student, $isGraduated = true) {
             $fullName = $isGraduated
-                ? trim("{$student->last_name}, {$student->first_name} " . ($student->middle_name ?? '') . ' ' . ($student->suffix ?? ''))
+                ? trim("{$student->last_name}, {$student->first_name} ".($student->middle_name ?? '').' '.($student->suffix ?? ''))
                 : trim("{$student->first_name} {$student->middle_name} {$student->last_name} {$student->suffix}");
 
             // Assuming alumni info is needed, include it here
@@ -685,29 +683,33 @@ class StudentController extends Controller
             ->where('is_graduated', true)
             ->with('alumni')  // Eager load the alumni relation
             ->get()
-            ->map(fn($student) => $formatStudent($student, true));
+            ->map(fn ($student) => $formatStudent($student, true));
 
         $nonGraduatedStudents = Student::select($fields)
             ->where('is_graduated', false)
             ->with([
                 'enrollments.classGroup.section.gradeLevel',
                 'enrollments.classGroup.schoolYear',
-                'enrollments.grades'
+                'enrollments.grades',
             ])
             ->get()
             ->filter(function ($student) {
                 // Get the latest enrollment based on school year ID
                 $latestEnrollment = $student->enrollments
-                    ->sortByDesc(fn($e) => optional($e->classGroup->schoolYear)->id)
+                    ->sortByDesc(fn ($e) => optional($e->classGroup->schoolYear)->id)
                     ->first();
 
-                if (!$latestEnrollment) return false;
+                if (! $latestEnrollment) {
+                    return false;
+                }
 
                 // Check if enrolled in Grade 12
                 $gradeLevelName = optional($latestEnrollment->classGroup->section->gradeLevel)->name;
                 $isGrade12 = $gradeLevelName === 'Grade 12';
 
-                if (!$isGrade12) return false;
+                if (! $isGrade12) {
+                    return false;
+                }
 
                 // Check if all final grades are passing
                 $allGradesPassing = $latestEnrollment->grades->every(function ($grade) {
@@ -716,7 +718,7 @@ class StudentController extends Controller
 
                 return $allGradesPassing;
             })
-            ->map(fn($student) => $formatStudent($student, false))
+            ->map(fn ($student) => $formatStudent($student, false))
             ->values(); // Reindex collection
 
         // Return to Inertia
@@ -812,7 +814,6 @@ class StudentController extends Controller
         ]);
     }
 
-
     public function storeEnrollment(StoreEnrollmentRequest $request)
     {
         $validated = $request->validated();
@@ -837,5 +838,4 @@ class StudentController extends Controller
 
         return redirect()->route('student.home')->with('success', 'Enrollment created successfully.');
     }
-
 }

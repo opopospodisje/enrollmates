@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('section_id')->constrained()->cascadeOnDelete();
             $table->foreignId('school_year_id')->constrained()->cascadeOnDelete();
             $table->integer('student_limit')->default(40); // default limit
-            //$table->foreignId('adviser_id')->nullable()->constrained('teachers')->nullOnDelete(); // add when Teacher model exists
+            // $table->foreignId('adviser_id')->nullable()->constrained('teachers')->nullOnDelete(); // add when Teacher model exists
             $table->timestamps();
         });
     }

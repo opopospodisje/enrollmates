@@ -72,12 +72,12 @@ const EditTeacherDialog = ({ teacher , buttonStyle}: Props) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {buttonStyle === 'withName' ? (
-          <Button className='bg-emerald-600 hover:bg-emerald-700'>
+          <Button className='bg-emerald-600 hover:bg-emerald-700' title="Edit Teacher">
             <SquarePen className="mr-2" />
             Edit Grade Level
           </Button>
         ) : (
-          <Button variant="outline">
+          <Button variant="outline" title="Edit Teacher">
             <SquarePen />
           </Button>
         )}

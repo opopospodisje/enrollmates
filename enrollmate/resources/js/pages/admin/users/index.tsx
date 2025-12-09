@@ -1,40 +1,24 @@
-import { RoomType, type BreadcrumbItem } from '@/types';
-import AppLayout from '@/layouts/app-layout';
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ArrowDown01, ArrowDown10, ArrowDownAZ, ArrowDownZA, BedDouble, CornerDownRight, Eye, FileDown, List, Plus, SquarePen, Trash2, User, User2, UserCog } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
-import * as React from "react"
-import { ColumnDef, ColumnFiltersState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState, } from "@tanstack/react-table"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select"
-import { ChevronDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Label } from '@/components/ui/label';
-import TableExportDropdown from '@/components/TableExportDropdown';
-import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
-import { Separator } from '@/components/ui/separator';
-import TableToolbar from '@/components/table/TableToolbar';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { useState, useRef } from 'react';
+import Heading from '@/components/heading';
 import RoomTable from '@/components/table/RoomTable';
+import TableToolbar from '@/components/table/TableToolbar';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Checkbox } from "@/components/ui/checkbox";
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Separator } from '@/components/ui/separator';
+import { Toaster } from '@/components/ui/sonner';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, router, useForm } from '@inertiajs/react';
+import { ColumnDef, ColumnFiltersState, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState } from "@tanstack/react-table";
+import { ArrowDown01, ArrowDown10, ArrowDownAZ, ArrowDownZA, List, Trash2, User, UserCog } from 'lucide-react';
+import * as React from "react";
+import { useState } from 'react';
+import { toast } from 'sonner';
 import CreateUserDialog from './Components/CreateUserDialog';
 import EditUserDialog from './Components/EditUserDialog';
-import Heading from '@/components/heading';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -53,6 +37,7 @@ interface User {
   role:string;
   role_id:number;
   is_verified:boolean;
+  is_archived?: boolean;
 }
 
 type Role = {
@@ -63,9 +48,10 @@ type Role = {
 type UserIndexProps = {
   users: User[];
   roles: Role[];
+  view: string;
 };
 
-const UserIndex = ({ users,roles }: UserIndexProps) => {
+const UserIndex = ({ users, roles, view }: UserIndexProps) => {
 
   const {delete: destroy} = useForm();
 
@@ -291,6 +277,7 @@ const UserIndex = ({ users,roles }: UserIndexProps) => {
       },
       cell: ({ row }) => {
         const roleString = row.getValue("role") as string;
+        const archived = (row.original.is_archived ?? false) && roleString === 'teacher';
         let bgColor = 'bg-purple-500';
         if (roleString === 'student') {
           bgColor = 'bg-neutral-500';
@@ -299,8 +286,13 @@ const UserIndex = ({ users,roles }: UserIndexProps) => {
         }
 
         return (
-          <div className={`capitalize text-xs text-white text-center px-3 py-1 rounded-full ${bgColor}`}>
-            {roleString}
+          <div className="flex items-center gap-2">
+            <div className={`capitalize text-xs text-white text-center px-3 py-1 rounded-full ${bgColor}`}>
+              {roleString}
+            </div>
+            {archived && (
+              <div className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground border">archived</div>
+            )}
           </div>
         );
       },
@@ -364,6 +356,10 @@ const UserIndex = ({ users,roles }: UserIndexProps) => {
     enableSortingRemoval: false,
   })
 
+  const onTabChange = (value: string) => {
+    router.get(route('admin.users.index'), { view: value }, { preserveScroll: true });
+  };
+
   return (
     <div className="container">
       <Head title="Users" />
@@ -382,6 +378,12 @@ const UserIndex = ({ users,roles }: UserIndexProps) => {
 
         <CreateUserDialog roles={roles} />
       </div>
+      <Tabs value={view} onValueChange={onTabChange}>
+        <TabsList>
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="archived_teachers">Archived Teachers</TabsTrigger>
+        </TabsList>
+      </Tabs>
       <Card className="p-0 gap-0 overflow-hidden">
         <CardHeader className="p-0">
           <TableToolbar

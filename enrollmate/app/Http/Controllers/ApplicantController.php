@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Applicant;
-use App\Models\GradeLevel;
-use App\Models\SchoolYear;
 use App\Http\Requests\StoreApplicantRequest;
 use App\Http\Requests\UpdateApplicantRequest;
+use App\Models\Applicant;
+use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +23,7 @@ class ApplicantController extends Controller
             ->map(function ($applicant) {
                 return [
                     'id' => $applicant->id,
-                    'full_name' => $applicant->first_name . ' ' . $applicant->middle_name . ' ' . $applicant->last_name . ($applicant->suffix ? ', ' . $applicant->suffix : ''),
+                    'full_name' => $applicant->first_name.' '.$applicant->middle_name.' '.$applicant->last_name.($applicant->suffix ? ', '.$applicant->suffix : ''),
                     'first_name' => $applicant->first_name,
                     'last_name' => $applicant->last_name,
                     'middle_name' => $applicant->middle_name,
@@ -34,13 +33,13 @@ class ApplicantController extends Controller
                     'address' => $applicant->address,
                     'birthdate' => $applicant->birthdate,
                     'gender' => $applicant->gender,
-                    
+
                     'status' => $applicant->status,
                     'entrance_exam_score' => $applicant->entrance_exam_score,
                     'exam_taken_at' => $applicant->exam_taken_at ? $applicant->exam_taken_at->format('Y-m-d') : null,
 
                     'school_year_id' => $applicant->school_year_id,
-                    'school_year_name' =>$applicant->schoolYear->name,
+                    'school_year_name' => $applicant->schoolYear->name,
                 ];
             });
 
@@ -59,7 +58,7 @@ class ApplicantController extends Controller
             ->map(function ($applicant) {
                 return [
                     'id' => $applicant->id,
-                    'full_name' => $applicant->first_name . ' ' . $applicant->middle_name . ' ' . $applicant->last_name . ($applicant->suffix ? ', ' . $applicant->suffix : ''),
+                    'full_name' => $applicant->first_name.' '.$applicant->middle_name.' '.$applicant->last_name.($applicant->suffix ? ', '.$applicant->suffix : ''),
                     'first_name' => $applicant->first_name,
                     'last_name' => $applicant->last_name,
                     'middle_name' => $applicant->middle_name,
@@ -120,9 +119,9 @@ class ApplicantController extends Controller
         if ($role === 'teacher') {
             return redirect()->route('teacher.applicants.index')->with('success', 'Applicant created successfully.');
         }
+
         return redirect()->route('admin.applicants.index')->with('success', 'Applicant created successfully.');
     }
-
 
     /**
      * Display the specified resource.
@@ -131,7 +130,6 @@ class ApplicantController extends Controller
     {
         //
     }
-
 
     /**
      * Update the specified resource in storage.
@@ -168,7 +166,7 @@ class ApplicantController extends Controller
 
     public function bulkDelete(Request $request)
     {
-        //dd($request->all());
+        // dd($request->all());
         $ids = $request->input('ids');
 
         if (empty($ids)) {

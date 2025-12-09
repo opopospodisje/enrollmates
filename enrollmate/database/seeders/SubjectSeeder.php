@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Subject;
 use App\Models\ClassGroup;
-use App\Models\Teacher;
 use App\Models\ClassGroupSubject;
+use App\Models\Subject;
+use App\Models\Teacher;
+use Illuminate\Database\Seeder;
 
 class SubjectSeeder extends Seeder
 {
@@ -19,6 +18,7 @@ class SubjectSeeder extends Seeder
         $teachers = Teacher::all();
         if ($teachers->count() === 0) {
             $this->command->error('No teachers found. Please run TeacherSeeder first.');
+
             return;
         }
 
@@ -49,7 +49,7 @@ class SubjectSeeder extends Seeder
 
             // Assign to class groups for this grade
             $classGroups = ClassGroup::with('section.gradeLevel')
-                ->whereHas('section.gradeLevel', fn($q) => $q->where('name', "Grade {$grade}"))
+                ->whereHas('section.gradeLevel', fn ($q) => $q->where('name', "Grade {$grade}"))
                 ->get();
 
             foreach ($classGroups as $classGroup) {

@@ -4,9 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Spatie\Permission\Middleware\RoleMiddleware;
+use Symfony\Component\HttpFoundation\Response;
 
 class RedirectIfRoleUnauthorized extends RoleMiddleware
 {

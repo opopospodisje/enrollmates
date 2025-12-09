@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\SchoolYear;
+use Illuminate\Database\Seeder;
 
 class SchoolYearSeeder extends Seeder
 {

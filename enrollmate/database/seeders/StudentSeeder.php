@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Applicant;
-use App\Models\Student;
-use App\Models\SchoolYear;
 use App\Models\ClassGroup;
-use App\Models\Enrollment;
 use App\Models\ClassGroupSubject;
+use App\Models\Enrollment;
 use App\Models\Grade;
 use App\Models\GradeLevel;
+use App\Models\SchoolYear;
+use App\Models\Student;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class StudentSeeder extends Seeder
 {
@@ -26,8 +26,9 @@ class StudentSeeder extends Seeder
         // Find the current/latest school year
         $currentSchoolYear = SchoolYear::where('name', '2025–2026')->first();
 
-        if (!$currentSchoolYear) {
+        if (! $currentSchoolYear) {
             $this->command->error('Current school year (2025–2026) not found.');
+
             return;
         }
 
@@ -50,11 +51,12 @@ class StudentSeeder extends Seeder
 
             if (count($schoolYearsForStudent) < count($gradeHistory)) {
                 $this->command->error("Not enough school years to assign to student #{$i}.");
+
                 continue;
             }
 
             // Create unique email
-            $uniqueEmail = "student{$i}_" . uniqid() . "@example.com";
+            $uniqueEmail = "student{$i}_".uniqid().'@example.com';
 
             $faker = \Faker\Factory::create();
 
@@ -114,19 +116,21 @@ class StudentSeeder extends Seeder
                 $schoolYear = $schoolYearsForStudent[$index];
                 $gradeLevel = $gradeLevels[$gradeName] ?? null;
 
-                if (!$schoolYear || !$gradeLevel) {
+                if (! $schoolYear || ! $gradeLevel) {
                     $this->command->error("Missing data for $gradeName / $schoolYear->name.");
+
                     continue;
                 }
 
                 $classGroups = ClassGroup::whereHas('section', function ($q) use ($gradeLevel) {
                     $q->where('grade_level_id', $gradeLevel->id);
                 })
-                ->where('school_year_id', $schoolYear->id)
-                ->get();
+                    ->where('school_year_id', $schoolYear->id)
+                    ->get();
 
                 if ($classGroups->isEmpty()) {
                     $this->command->error("No class groups found for {$gradeName} in {$schoolYear->name}.");
+
                     continue;
                 }
 
@@ -137,6 +141,7 @@ class StudentSeeder extends Seeder
 
                 if ($classGroupsWithSpace->isEmpty()) {
                     $this->command->error("All class groups for {$gradeName} in {$schoolYear->name} are full.");
+
                     continue;
                 }
 

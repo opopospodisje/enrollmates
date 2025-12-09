@@ -26,7 +26,7 @@ class UpdateApplicantRequest extends FormRequest
             'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'suffix' => 'nullable|string|max:10',
-            'email' => 'required|email|max:255|unique:applicants,email,' . $this->applicant->id,
+            'email' => 'required|email|max:255|unique:applicants,email,'.$this->applicant->id,
             'contact_number' => 'nullable|string|max:15',
             'address' => 'nullable|string|max:255',
             'gender' => 'required|in:male,female',

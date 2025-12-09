@@ -2,12 +2,12 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RedirectIfRoleUnauthorized;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Spatie\Permission\Middleware\RoleMiddleware;
-use App\Http\Middleware\RedirectIfRoleUnauthorized;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,7 +22,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'role_redirect' => RedirectIfRoleUnauthorized::class,
         ]);
-
 
         $middleware->web(append: [
             HandleAppearance::class,

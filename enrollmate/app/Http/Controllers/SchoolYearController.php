@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SchoolYear;
-use App\Models\Section;
-use App\Models\ClassGroup;
 use App\Http\Requests\StoreSchoolYearRequest;
 use App\Http\Requests\UpdateSchoolYearRequest;
+use App\Models\ClassGroup;
+use App\Models\SchoolYear;
+use App\Models\Section;
 
 class SchoolYearController extends Controller
 {
@@ -15,13 +15,12 @@ class SchoolYearController extends Controller
      */
     public function index()
     {
-        $schoolYear = SchoolYear::select( 'id', 'name', 'is_active')->get();
+        $schoolYear = SchoolYear::select('id', 'name', 'is_active')->get();
 
         return inertia('admin/schoolyear/index', [
             'schoolYear' => $schoolYear,
         ]);
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -48,9 +47,8 @@ class SchoolYearController extends Controller
         }
 
         return redirect()->route('admin.schoolyears.index')
-                        ->with('success', 'School Year created successfully.');
+            ->with('success', 'School Year created successfully.');
     }
-
 
     /**
      * Update the specified resource in storage.
