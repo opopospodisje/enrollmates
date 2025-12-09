@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ClassGroup;
-use App\Models\Section;
-use App\Models\SchoolYear;
-use App\Models\Enrollment;
-use Illuminate\Http\Request;
 use App\Http\Requests\StoreClassGroupRequest;
 use App\Http\Requests\UpdateClassGroupRequest;
-use Illuminate\Support\Collection;
+use App\Models\ClassGroup;
+use App\Models\Enrollment;
+use App\Models\SchoolYear;
+use App\Models\Section;
+use Illuminate\Http\Request;
 
 class ClassGroupController extends Controller
 {
@@ -19,7 +18,7 @@ class ClassGroupController extends Controller
     public function index()
     {
         $classGroups = ClassGroup::with(['section.gradeLevel', 'schoolYear'])
-            ->select('id', 'section_id', 'school_year_id','student_limit') //'adviser_id'
+            ->select('id', 'section_id', 'school_year_id', 'student_limit') // 'adviser_id'
             ->withCount('enrollments')
             ->get()
             ->map(function ($classGroup) {
@@ -30,8 +29,8 @@ class ClassGroupController extends Controller
                     'section_name' => $classGroup->section->name ?? 'N/A',
                     'school_year_name' => $classGroup->schoolYear->name ?? 'N/A',
                     'grade_level_name' => $classGroup->section->gradeLevel->name ?? 'N/A',
-                    'section_and_level' => $classGroup->section->name . ' - ' . ($classGroup->section->gradeLevel->name ?? 'N/A'),
-                    //'adviser_id' => $classGroup->adviser_id,
+                    'section_and_level' => $classGroup->section->name.' - '.($classGroup->section->gradeLevel->name ?? 'N/A'),
+                    // 'adviser_id' => $classGroup->adviser_id,
                     'student_limit' => $classGroup->student_limit,
                     'enrollments_count' => $classGroup->enrollments_count, // ← here it is!
                 ];
@@ -49,10 +48,10 @@ class ClassGroupController extends Controller
     public function topStudentsByClassGroups()
     {
         $classGroups = ClassGroup::with(['section.gradeLevel', 'schoolYear'])
-            ->select('id', 'section_id', 'school_year_id', 'student_limit') //'adviser_id'
+            ->select('id', 'section_id', 'school_year_id', 'student_limit') // 'adviser_id'
             ->withCount('enrollments')
             // Fix the whereHas to filter schoolYear's 'is_active' column
-            ->whereHas('schoolYear', function($query) {
+            ->whereHas('schoolYear', function ($query) {
                 $query->where('is_active', true);
             })
             ->get()
@@ -64,8 +63,8 @@ class ClassGroupController extends Controller
                     'section_name' => $classGroup->section->name ?? 'N/A',
                     'school_year_name' => $classGroup->schoolYear->name ?? 'N/A',
                     'grade_level_name' => $classGroup->section->gradeLevel->name ?? 'N/A',
-                    'section_and_level' => $classGroup->section->name . ' - ' . ($classGroup->section->gradeLevel->name ?? 'N/A'),
-                    //'adviser_id' => $classGroup->adviser_id,
+                    'section_and_level' => $classGroup->section->name.' - '.($classGroup->section->gradeLevel->name ?? 'N/A'),
+                    // 'adviser_id' => $classGroup->adviser_id,
                     'student_limit' => $classGroup->student_limit,
                     'enrollments_count' => $classGroup->enrollments_count, // ← this looks good!
                 ];
@@ -79,13 +78,10 @@ class ClassGroupController extends Controller
         ]);
     }
 
-
-
-
     public function teacherIndex()
     {
         $classGroups = ClassGroup::with(['section.gradeLevel', 'schoolYear'])
-            ->select('id', 'section_id', 'school_year_id') //'adviser_id'
+            ->select('id', 'section_id', 'school_year_id') // 'adviser_id'
             ->get()
             ->map(function ($classGroup) {
                 return [
@@ -95,8 +91,8 @@ class ClassGroupController extends Controller
                     'section_name' => $classGroup->section->name ?? 'N/A',
                     'school_year_name' => $classGroup->schoolYear->name ?? 'N/A',
                     'grade_level_name' => $classGroup->section->gradeLevel->name ?? 'N/A',
-                    'section_and_level' => $classGroup->section->name . ' - ' . ($classGroup->section->gradeLevel->name ?? 'N/A'),
-                    //'adviser_id' => $classGroup->adviser_id,
+                    'section_and_level' => $classGroup->section->name.' - '.($classGroup->section->gradeLevel->name ?? 'N/A'),
+                    // 'adviser_id' => $classGroup->adviser_id,
                 ];
             });
 
@@ -104,7 +100,6 @@ class ClassGroupController extends Controller
             'classGroups' => $classGroups,
         ]);
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -129,15 +124,14 @@ class ClassGroupController extends Controller
     /**
      * Display the specified resource.
      */
-
     public function topStudentsByClassGroupsShow(ClassGroup $classGroup)
     {
         $enrollments = Enrollment::with([
             'student:id,first_name,last_name,middle_name,suffix,gender',
             'grades.classGroupSubject.subject',
         ])
-        ->where('class_group_id', $classGroup->id)
-        ->get();
+            ->where('class_group_id', $classGroup->id)
+            ->get();
 
         $gradingPeriods = ['first_quarter', 'second_quarter', 'third_quarter', 'fourth_quarter'];
         $topStudentsByGrading = [];
@@ -154,19 +148,19 @@ class ClassGroupController extends Controller
                 return [
                     'id' => $enrollment->student->id,
                     'name' => trim(
-                        $enrollment->student->last_name . ', ' .
-                        $enrollment->student->first_name . ' ' .
-                        ($enrollment->student->middle_name ?? '') . ' ' .
+                        $enrollment->student->last_name.', '.
+                        $enrollment->student->first_name.' '.
+                        ($enrollment->student->middle_name ?? '').' '.
                         ($enrollment->student->suffix ?? '')
                     ),
                     'gender' => $enrollment->student->gender,
                     'average' => $average,
                 ];
             })
-            ->filter(fn($student) => $student['average'] !== null)
-            ->sortByDesc('average')
-            ->take(10)
-            ->values();
+                ->filter(fn ($student) => $student['average'] !== null)
+                ->sortByDesc('average')
+                ->take(10)
+                ->values();
 
             $topStudentsByGrading[$grading] = $studentsWithAverage;
         }
@@ -178,7 +172,6 @@ class ClassGroupController extends Controller
             'topStudentsByGrading' => $topStudentsByGrading,
         ]);
     }
-
 
     /**
      * Show the form for editing the specified resource.
@@ -212,7 +205,7 @@ class ClassGroupController extends Controller
 
     public function bulkDelete(Request $request)
     {
-        //dd($request->all());
+        // dd($request->all());
         $ids = $request->input('ids');
 
         if (empty($ids)) {

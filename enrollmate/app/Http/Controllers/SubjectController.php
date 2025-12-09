@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Subject;
-use App\Models\ClassGroupSubject;
-use App\Models\ClassGroup;
-use App\Models\GradeLevel;
-use App\Models\Section;
-use App\Models\Enrollment;
-use App\Models\Teacher;
 use App\Http\Requests\StoreSubjectRequest;
 use App\Http\Requests\UpdateSubjectRequest;
+use App\Models\ClassGroup;
+use App\Models\ClassGroupSubject;
+use App\Models\Enrollment;
+use App\Models\GradeLevel;
+use App\Models\Section;
+use App\Models\Subject;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 
 class SubjectController extends Controller
@@ -22,9 +22,8 @@ class SubjectController extends Controller
     {
         $filter = $request->get('filter', 'all');
 
-        $subjectsQuery = Subject::select( 'id', 'code', 'name','is_special');
+        $subjectsQuery = Subject::select('id', 'code', 'name', 'is_special');
 
-    
         if ($filter === 'is_special') {
             $subjectsQuery->where('is_special', true);
         }
@@ -38,20 +37,20 @@ class SubjectController extends Controller
                     'class_group_id' => $classGroupSubject->class_group_id,
                     'subject_id' => $classGroupSubject->subject_id,
                     'teacher_id' => $classGroupSubject->teacher_id,
-                    'class_group_name' => ($classGroupSubject->classGroup->section->name ?? 'N/A') . ' - ' . ($classGroupSubject->classGroup->section->gradeLevel->name ?? 'N/A'),
+                    'class_group_name' => ($classGroupSubject->classGroup->section->name ?? 'N/A').' - '.($classGroupSubject->classGroup->section->gradeLevel->name ?? 'N/A'),
                     'subject_name' => $classGroupSubject->subject->name ?? 'N/A',
-                    'teacher_name' => ($classGroupSubject->teacher->last_name ?? 'N/A') . ', ' . ($classGroupSubject->teacher->first_name ?? 'N/A'),
+                    'teacher_name' => ($classGroupSubject->teacher->last_name ?? 'N/A').', '.($classGroupSubject->teacher->first_name ?? 'N/A'),
                 ];
             });
 
-        $subject =  $subjectsQuery
+        $subject = $subjectsQuery
             ->get()
             ->map(function ($subject) {
                 return [
                     'id' => $subject->id,
                     'code' => $subject->code,
                     'name' => $subject->name,
-                    'is_special' =>$subject->is_special,
+                    'is_special' => $subject->is_special,
                 ];
             });
 
@@ -95,92 +94,91 @@ class SubjectController extends Controller
     /**
      * Display the specified resource.
      */
-public function show(Subject $subject, Request $request)
-{
-    // Get filters from query parameters
-    $selectedLevel = $request->query('level', 'allLevels');
-    $selectedSection = $request->query('section', 'allSections');
-    $selectedGender = $request->query('gender', 'allGenders');
+    public function show(Subject $subject, Request $request)
+    {
+        // Get filters from query parameters
+        $selectedLevel = $request->query('level', 'allLevels');
+        $selectedSection = $request->query('section', 'allSections');
+        $selectedGender = $request->query('gender', 'allGenders');
 
-    // Eager load related data for subject
-    $subject->load([
-        'classGroupSubjects.classGroup.section.gradeLevel',
-        'classGroupSubjects.classGroup.schoolYear',
-        'classGroupSubjects.teacher'
-    ]);
+        // Eager load related data for subject
+        $subject->load([
+            'classGroupSubjects.classGroup.section.gradeLevel',
+            'classGroupSubjects.classGroup.schoolYear',
+            'classGroupSubjects.teacher',
+        ]);
 
-    // Get class group IDs for this subject
-    $classGroupIds = $subject->classGroupSubjects()->pluck('class_group_id');
+        // Get class group IDs for this subject
+        $classGroupIds = $subject->classGroupSubjects()->pluck('class_group_id');
 
-    // Base query for enrollments
-    $enrollmentsQuery = Enrollment::with([
-        'student:id,first_name,last_name,middle_name,suffix,gender',
-        'classGroup.section.gradeLevel:id,name',
-        'classGroup.schoolYear:id,name'
-    ])
-    ->whereIn('class_group_id', $classGroupIds);
+        // Base query for enrollments
+        $enrollmentsQuery = Enrollment::with([
+            'student:id,first_name,last_name,middle_name,suffix,gender',
+            'classGroup.section.gradeLevel:id,name',
+            'classGroup.schoolYear:id,name',
+        ])
+            ->whereIn('class_group_id', $classGroupIds);
 
-    // Filter by grade level
-    if ($selectedLevel !== 'allLevels') {
-        $enrollmentsQuery->whereHas('classGroup.section.gradeLevel', function ($q) use ($selectedLevel) {
-            $q->where('id', $selectedLevel);
+        // Filter by grade level
+        if ($selectedLevel !== 'allLevels') {
+            $enrollmentsQuery->whereHas('classGroup.section.gradeLevel', function ($q) use ($selectedLevel) {
+                $q->where('id', $selectedLevel);
+            });
+        }
+
+        // Filter by section
+        if ($selectedSection !== 'allSections') {
+            $enrollmentsQuery->whereHas('classGroup.section', function ($q) use ($selectedSection) {
+                $q->where('id', $selectedSection);
+            });
+        }
+
+        // Filter by gender
+        if ($selectedGender !== 'allGenders') {
+            $enrollmentsQuery->whereHas('student', function ($q) use ($selectedGender) {
+                $q->where('gender', $selectedGender);
+            });
+        }
+
+        // Map enrollments to format student data
+        $students = $enrollmentsQuery->get()->map(function ($enrollment) {
+            return [
+                'id' => $enrollment->student->id,
+                'full_name' => trim(
+                    $enrollment->student->last_name.', '.
+                    $enrollment->student->first_name.' '.
+                    ($enrollment->student->middle_name ?? '').' '.
+                    ($enrollment->student->suffix ?? '')
+                ),
+                'class_group' => sprintf(
+                    '%s - %s (%s)',
+                    $enrollment->classGroup->section->gradeLevel->name ?? 'No Grade',
+                    $enrollment->classGroup->section->name ?? 'No Section',
+                    $enrollment->classGroup->schoolYear->name ?? 'No SY'
+                ),
+                'gender' => $enrollment->student->gender,
+            ];
         });
+
+        // Get all grade levels and sections for filters
+        $gradeLevels = GradeLevel::select('id', 'name')->get();
+
+        $sectionsQuery = Section::select('id', 'name', 'grade_level_id');
+        if ($selectedLevel !== 'allLevels') {
+            $sectionsQuery->where('grade_level_id', $selectedLevel);
+        }
+        $sections = $sectionsQuery->get();
+
+        return inertia('teacher/subject/show', [
+            'subject' => $subject,
+            'students' => $students,
+            'gradeLevels' => $gradeLevels,
+            'sections' => $sections,
+            'selectedLevel' => $selectedLevel,
+            'selectedSection' => $selectedSection,
+            'selectedGender' => $selectedGender,
+        ]);
     }
-
-    // Filter by section
-    if ($selectedSection !== 'allSections') {
-        $enrollmentsQuery->whereHas('classGroup.section', function ($q) use ($selectedSection) {
-            $q->where('id', $selectedSection);
-        });
-    }
-
-    // Filter by gender
-    if ($selectedGender !== 'allGenders') {
-        $enrollmentsQuery->whereHas('student', function ($q) use ($selectedGender) {
-            $q->where('gender', $selectedGender);
-        });
-    }
-
-
-    // Map enrollments to format student data
-    $students = $enrollmentsQuery->get()->map(function ($enrollment) {
-        return [
-            'id' => $enrollment->student->id,
-            'full_name' => trim(
-                $enrollment->student->last_name . ', ' .
-                $enrollment->student->first_name . ' ' .
-                ($enrollment->student->middle_name ?? '') . ' ' .
-                ($enrollment->student->suffix ?? '')
-            ),
-            'class_group' => sprintf(
-                '%s - %s (%s)',
-                $enrollment->classGroup->section->gradeLevel->name ?? 'No Grade',
-                $enrollment->classGroup->section->name ?? 'No Section',
-                $enrollment->classGroup->schoolYear->name ?? 'No SY'
-            ),
-            'gender' => $enrollment->student->gender,
-        ];
-    });
-
-    // Get all grade levels and sections for filters
-    $gradeLevels = GradeLevel::select('id', 'name')->get();
-
-    $sectionsQuery = Section::select('id', 'name', 'grade_level_id');
-    if ($selectedLevel !== 'allLevels') {
-        $sectionsQuery->where('grade_level_id', $selectedLevel);
-    }
-    $sections = $sectionsQuery->get();
-
-    return inertia('teacher/subject/show', [
-        'subject' => $subject,
-        'students' => $students,
-        'gradeLevels' => $gradeLevels,
-        'sections' => $sections,
-        'selectedLevel' => $selectedLevel,
-        'selectedSection' => $selectedSection,
-        'selectedGender' => $selectedGender,
-    ]);
-}
 
     /**
      * Show the form for editing the specified resource.
@@ -214,7 +212,7 @@ public function show(Subject $subject, Request $request)
 
     public function bulkDelete(Request $request)
     {
-        //dd($request->all());
+        // dd($request->all());
         $ids = $request->input('ids');
 
         if (empty($ids)) {

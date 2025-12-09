@@ -2,23 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Student;
+use App\Models\Alumni;
 use App\Models\Applicant;
-use App\Models\Teacher;
-use App\Models\Section;
 use App\Models\ClassGroup;
+use App\Models\ClassGroupSubject;
 use App\Models\Enrollment;
 use App\Models\SchoolYear;
-use App\Models\ClassGroupSubject;
-use App\Models\Alumni;
-
+use App\Models\Section;
+use App\Models\Student;
+use App\Models\Teacher;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $admin = auth()->user();
+        $admin = Auth::user();
+        if (! $admin) {
+            return redirect()->route('login');
+        }
 
         $activeSchoolYear = SchoolYear::where('is_active', true)->first();
 
@@ -38,7 +40,7 @@ class DashboardController extends Controller
                         'section' => $enrollment->classGroup->section ? [
                             'name' => $enrollment->classGroup->section->name ?? 'N/A',
                             'gradeLevel' => $enrollment->classGroup->section->gradeLevel ? [
-                                'name' => $enrollment->classGroup->section->gradeLevel->name ?? 'N/A'
+                                'name' => $enrollment->classGroup->section->gradeLevel->name ?? 'N/A',
                             ] : null,
                         ] : null,
                     ] : null,
@@ -82,7 +84,18 @@ class DashboardController extends Controller
 
     public function teacherIndex()
     {
-        $teacher = auth()->user()->teacher;
+        $user = Auth::user();
+        if (! $user) {
+            return redirect()->route('login');
+        }
+        $teacher = $user->teacher;
+        if (! $teacher) {
+            Auth::logout();
+            session()->invalidate();
+            session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors(['email' => 'Teacher profile not found.']);
+        }
         $activeSchoolYear = SchoolYear::where('is_active', true)->first();
 
         // Get class group IDs where the teacher is assigned
@@ -104,13 +117,13 @@ class DashboardController extends Controller
             ->latest()
             ->take(5)
             ->get()
-            ->map(function($enrollment) {
+            ->map(function ($enrollment) {
                 return [
                     'id' => $enrollment->student->id,
                     'first_name' => $enrollment->student->first_name,
                     'last_name' => $enrollment->student->last_name,
-                    'class_group' => ($enrollment->classGroup->section->name ?? 'N/A') . 
-                                    ' - ' . ($enrollment->classGroup->section->gradeLevel->name ?? 'N/A'),
+                    'class_group' => ($enrollment->classGroup->section->name ?? 'N/A').
+                                    ' - '.($enrollment->classGroup->section->gradeLevel->name ?? 'N/A'),
                 ];
             });
 
@@ -123,6 +136,4 @@ class DashboardController extends Controller
             'recentStudents' => $recentStudents,
         ]);
     }
-
-
 }

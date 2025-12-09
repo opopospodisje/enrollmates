@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\ClassGroup;
-use App\Models\Section;
 use App\Models\SchoolYear;
+use App\Models\Section;
+use Illuminate\Database\Seeder;
 
 class ClassGroupSeeder extends Seeder
 {
@@ -15,6 +15,7 @@ class ClassGroupSeeder extends Seeder
 
         if ($schoolYears->isEmpty()) {
             $this->command->error('No school years found. Please run SchoolYearSeeder first.');
+
             return;
         }
 
@@ -22,6 +23,7 @@ class ClassGroupSeeder extends Seeder
 
         if ($sections->isEmpty()) {
             $this->command->error('No sections found. Please run SectionSeeder first.');
+
             return;
         }
 

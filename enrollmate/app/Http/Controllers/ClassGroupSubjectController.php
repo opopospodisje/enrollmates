@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ClassGroupSubject;
-use App\Models\ClassGroup;
-use App\Models\Subject;
-use App\Models\Teacher;
-use App\Models\Grade;
-use App\Models\Enrollment;
-use App\Models\SchoolSettings;
 use App\Http\Requests\StoreClassGroupSubjectRequest;
 use App\Http\Requests\UpdateClassGroupSubjectRequest;
+use App\Models\ClassGroup;
+use App\Models\ClassGroupSubject;
+use App\Models\Enrollment;
+use App\Models\Grade;
+use App\Models\SchoolSettings;
+use App\Models\Subject;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -30,9 +30,9 @@ class ClassGroupSubjectController extends Controller
                     'class_group_id' => $classGroupSubject->class_group_id,
                     'subject_id' => $classGroupSubject->subject_id,
                     'teacher_id' => $classGroupSubject->teacher_id,
-                    'class_group_name' => ($classGroupSubject->classGroup->section->name ?? 'N/A') . ' - ' . ($classGroupSubject->classGroup->section->gradeLevel->name ?? 'N/A'),
+                    'class_group_name' => ($classGroupSubject->classGroup->section->name ?? 'N/A').' - '.($classGroupSubject->classGroup->section->gradeLevel->name ?? 'N/A'),
                     'subject_name' => $classGroupSubject->subject->name ?? 'N/A',
-                    'teacher_name' => ($classGroupSubject->teacher->last_name ?? 'N/A') . ', ' . ($classGroupSubject->teacher->first_name ?? 'N/A'),
+                    'teacher_name' => ($classGroupSubject->teacher->last_name ?? 'N/A').', '.($classGroupSubject->teacher->first_name ?? 'N/A'),
                 ];
             });
 
@@ -67,10 +67,10 @@ class ClassGroupSubjectController extends Controller
                     'class_group_id' => $classGroupSubject->class_group_id,
                     'subject_id' => $classGroupSubject->subject_id,
                     'teacher_id' => $classGroupSubject->teacher_id,
-                    'class_group_name' => ($classGroupSubject->classGroup->section->name ?? 'N/A') . 
-                                        ' - ' . ($classGroupSubject->classGroup->section->gradeLevel->name ?? 'N/A'),
+                    'class_group_name' => ($classGroupSubject->classGroup->section->name ?? 'N/A').
+                                        ' - '.($classGroupSubject->classGroup->section->gradeLevel->name ?? 'N/A'),
                     'subject_name' => $classGroupSubject->subject->name ?? 'N/A',
-                    'teacher_name' => ($classGroupSubject->teacher->last_name ?? 'N/A') . ', ' . 
+                    'teacher_name' => ($classGroupSubject->teacher->last_name ?? 'N/A').', '.
                                     ($classGroupSubject->teacher->first_name ?? 'N/A'),
                 ];
             });
@@ -107,7 +107,7 @@ class ClassGroupSubjectController extends Controller
     public function classGroupSubjectGrades($classGroupId, $classGroupSubjectId)
     {
         // Get the ClassGroupSubject with its subject & teacher
-        $classGroupSubject = ClassGroupSubject::with(['subject', 'teacher','classGroup.section.gradeLevel','classGroup.schoolYear'])
+        $classGroupSubject = ClassGroupSubject::with(['subject', 'teacher', 'classGroup.section.gradeLevel', 'classGroup.schoolYear'])
             ->where('id', $classGroupSubjectId)
             ->where('class_group_id', $classGroupId)
             ->firstOrFail();
@@ -116,29 +116,30 @@ class ClassGroupSubjectController extends Controller
         $enrollments = Enrollment::with(['student', 'grades' => function ($q) use ($classGroupSubjectId) {
             // Only fetch grades for this subject
             $q->where('class_group_subject_id', $classGroupSubjectId)
-            ->with('classGroupSubject.subject', 'classGroupSubject.teacher');
+                ->with('classGroupSubject.subject', 'classGroupSubject.teacher');
         }])
-        ->where('class_group_id', $classGroupId)
-        ->get();
+            ->where('class_group_id', $classGroupId)
+            ->get();
 
         // Format data
         $studentsWithGrades = $enrollments->map(function ($enrollment) {
             $grade = $enrollment->grades->first();
+
             return [
-                'enrollment_id'  => $enrollment->id,
-                'student_id'     => $enrollment->student->id,
-                'student_name'   => $enrollment->student->last_name . ', ' . $enrollment->student->first_name,
-                'first_quarter'  => $grade?->first_quarter,
+                'enrollment_id' => $enrollment->id,
+                'student_id' => $enrollment->student->id,
+                'student_name' => $enrollment->student->last_name.', '.$enrollment->student->first_name,
+                'first_quarter' => $grade?->first_quarter,
                 'second_quarter' => $grade?->second_quarter,
-                'third_quarter'  => $grade?->third_quarter,
+                'third_quarter' => $grade?->third_quarter,
                 'fourth_quarter' => $grade?->fourth_quarter,
-                'final_grade'    => $grade?->final_grade,
+                'final_grade' => $grade?->final_grade,
             ];
         });
 
         $settings = SchoolSettings::all();
 
-        return inertia('teacher/classgroupsubject/classGrade',[
+        return inertia('teacher/classgroupsubject/classGrade', [
             'classGroupSubject' => $classGroupSubject,
             'grades' => $studentsWithGrades,
             'settings' => $settings,
@@ -176,7 +177,6 @@ class ClassGroupSubjectController extends Controller
 
         return redirect()->route('admin.subjects.index')->with('success', 'Class Group Subject created successfully and grade records added for all enrolled students.');
     }
-
 
     /**
      * Display the specified resource.
@@ -218,7 +218,7 @@ class ClassGroupSubjectController extends Controller
 
     public function bulkDelete(Request $request)
     {
-        //dd($request->all());
+        // dd($request->all());
         $ids = $request->input('ids');
 
         if (empty($ids)) {
@@ -253,11 +253,11 @@ class ClassGroupSubjectController extends Controller
                         'class_group_subject_id' => $classGroupSubject->id,
                     ],
                     [
-                        'first_quarter'  => $g['first_quarter'] ?? null,
+                        'first_quarter' => $g['first_quarter'] ?? null,
                         'second_quarter' => $g['second_quarter'] ?? null,
-                        'third_quarter'  => $g['third_quarter'] ?? null,
+                        'third_quarter' => $g['third_quarter'] ?? null,
                         'fourth_quarter' => $g['fourth_quarter'] ?? null,
-                        'final_grade'    => $g['final_grade'] ?? null,
+                        'final_grade' => $g['final_grade'] ?? null,
                     ]
                 );
             }

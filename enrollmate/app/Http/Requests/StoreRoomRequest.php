@@ -35,7 +35,7 @@ class StoreRoomRequest extends FormRequest
             'sub_room_of' => ['nullable', 'exists:rooms,id'],
 
             // File validation
-            //'attachments.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // max 5MB per file
+            // 'attachments.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // max 5MB per file
         ];
     }
 }

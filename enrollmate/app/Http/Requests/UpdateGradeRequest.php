@@ -24,11 +24,11 @@ class UpdateGradeRequest extends FormRequest
         return [
             'grades' => ['required', 'array'],
             'grades.*.id' => ['required', 'integer', 'exists:grades,id'],
-            'grades.*.first_quarter'  => ['nullable','numeric','min:0','max:100'],
-            'grades.*.second_quarter' => ['nullable','numeric','min:0','max:100'],
-            'grades.*.third_quarter'  => ['nullable','numeric','min:0','max:100'],
-            'grades.*.fourth_quarter' => ['nullable','numeric','min:0','max:100'],
-            'grades.*.final_grade'    => ['nullable','numeric','min:0','max:100'],
+            'grades.*.first_quarter' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'grades.*.second_quarter' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'grades.*.third_quarter' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'grades.*.fourth_quarter' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'grades.*.final_grade' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ];
     }
 }

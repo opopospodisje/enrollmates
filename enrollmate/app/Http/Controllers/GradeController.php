@@ -2,21 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Grade;
-use App\Models\Student;
-use App\Models\Enrollment;
-use App\Models\GradeLevel;
-use App\Models\Section;
-use App\Models\ClassGroupSubject;
-use App\Models\ClassGroup;
-use App\Models\SchoolSettings;
-use App\Models\SchoolYear;
-
 use App\Http\Requests\StoreGradeRequest;
 use App\Http\Requests\UpdateGradeRequest;
+use App\Models\ClassGroupSubject;
+use App\Models\Enrollment;
+use App\Models\Grade;
+use App\Models\GradeLevel;
+use App\Models\SchoolSettings;
+use App\Models\SchoolYear;
+use App\Models\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
 
 class GradeController extends Controller
 {
@@ -37,13 +33,13 @@ class GradeController extends Controller
         if ($selectedLevel !== 'allLevels') {
             $sectionsQuery->where('grade_level_id', $selectedLevel);
         }
-        
+
         $sections = $sectionsQuery->get();
 
         // Get the current active school year
         $activeSchoolYear = SchoolYear::where('is_active', true)->first();
 
-        if (!$activeSchoolYear) {
+        if (! $activeSchoolYear) {
             // Handle case when there's no active school year
             return response()->json(['message' => 'No active school year found'], 404);
         }
@@ -52,15 +48,15 @@ class GradeController extends Controller
         $enrollmentsQuery = Enrollment::with([
             'student:id,last_name,first_name,middle_name,suffix,gender,is_graduated',
             'classGroup.section.gradeLevel:id,name',
-            'classGroup.schoolYear:id,name'
+            'classGroup.schoolYear:id,name',
         ])
-        ->select('id', 'student_id', 'class_group_id', 'enrolled_at', 'status')
-        ->whereHas('classGroup.schoolYear', function ($query) use ($activeSchoolYear) {
-            $query->where('id', $activeSchoolYear->id); // Only consider enrollments for active school year
-        })
-        ->whereHas('student', function ($query) {
-            $query->where('is_graduated', false); // Only students who are not graduated
-        });
+            ->select('id', 'student_id', 'class_group_id', 'enrolled_at', 'status')
+            ->whereHas('classGroup.schoolYear', function ($query) use ($activeSchoolYear) {
+                $query->where('id', $activeSchoolYear->id); // Only consider enrollments for active school year
+            })
+            ->whereHas('student', function ($query) {
+                $query->where('is_graduated', false); // Only students who are not graduated
+            });
 
         // Filter by grade level
         if ($selectedLevel !== 'allLevels') {
@@ -89,9 +85,9 @@ class GradeController extends Controller
                 'id' => $enrollment->id,
                 'student_id' => $enrollment->student_id,
                 'student_name' => trim(
-                    $enrollment->student->last_name . ', ' .
-                    $enrollment->student->first_name . ' ' .
-                    ($enrollment->student->middle_name ?? '') . ' ' .
+                    $enrollment->student->last_name.', '.
+                    $enrollment->student->first_name.' '.
+                    ($enrollment->student->middle_name ?? '').' '.
                     ($enrollment->student->suffix ?? '')
                 ),
                 'class_group_id' => $enrollment->class_group_id,
@@ -142,13 +138,13 @@ class GradeController extends Controller
         $enrollmentsQuery = Enrollment::with([
             'student:id,last_name,first_name,middle_name,suffix,gender',
             'classGroup.section.gradeLevel:id,name',
-            'classGroup.schoolYear:id,name'
+            'classGroup.schoolYear:id,name',
         ])
-        ->select('id', 'student_id', 'class_group_id', 'enrolled_at', 'status')
-        ->whereIn('class_group_id', $classGroupIds)
-        ->whereHas('classGroup.schoolYear', function ($q) {
-            $q->where('is_active', true);
-        });
+            ->select('id', 'student_id', 'class_group_id', 'enrolled_at', 'status')
+            ->whereIn('class_group_id', $classGroupIds)
+            ->whereHas('classGroup.schoolYear', function ($q) {
+                $q->where('is_active', true);
+            });
 
         // Filter by grade level
         if ($selectedLevel !== 'allLevels') {
@@ -177,9 +173,9 @@ class GradeController extends Controller
                 'id' => $enrollment->id,
                 'student_id' => $enrollment->student_id,
                 'student_name' => trim(
-                    $enrollment->student->last_name . ', ' .
-                    $enrollment->student->first_name . ' ' .
-                    ($enrollment->student->middle_name ?? '') . ' ' .
+                    $enrollment->student->last_name.', '.
+                    $enrollment->student->first_name.' '.
+                    ($enrollment->student->middle_name ?? '').' '.
                     ($enrollment->student->suffix ?? '')
                 ),
                 'class_group_id' => $enrollment->class_group_id,
@@ -204,7 +200,6 @@ class GradeController extends Controller
             'selectedGender' => $selectedGender,
         ]);
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -235,14 +230,14 @@ class GradeController extends Controller
      */
     public function edit(Enrollment $enrollment)
     {
-        
+
         $enrollment->load('student', 'classGroup.section.gradeLevel', 'classGroup.schoolYear');
-        //dd($enrollment);
+        // dd($enrollment);
 
         // Load grades with subject + teacher info
         $grades = $enrollment->grades()->with('classGroupSubject.subject', 'classGroupSubject.teacher')->get();
 
-        //dd($grades);
+        // dd($grades);
 
         $settings = SchoolSettings::all();
 
@@ -277,14 +272,12 @@ class GradeController extends Controller
         ]);
     }
 
-
-
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateGradeRequest $request, Enrollment $enrollment)
     {
-        //dd($request->validated());
+        // dd($request->validated());
 
         $gradesData = $request->validated()['grades'];
 
@@ -293,11 +286,11 @@ class GradeController extends Controller
                 Grade::where('id', $g['id'])
                     ->where('enrollment_id', $enrollment->id)
                     ->update([
-                        'first_quarter'  => $g['first_quarter'] ?? null,
+                        'first_quarter' => $g['first_quarter'] ?? null,
                         'second_quarter' => $g['second_quarter'] ?? null,
-                        'third_quarter'  => $g['third_quarter'] ?? null,
+                        'third_quarter' => $g['third_quarter'] ?? null,
                         'fourth_quarter' => $g['fourth_quarter'] ?? null,
-                        'final_grade'    => $g['final_grade'] ?? null,
+                        'final_grade' => $g['final_grade'] ?? null,
                     ]);
             }
         });

@@ -29,7 +29,7 @@ return new class extends Migration
             $table->date('exam_taken_at')->nullable();
             $table->text('exam_remarks')->nullable();
 
-            $table->enum('status', ['pending', 'accepted', 'failed','enrolled'])->default('pending');
+            $table->enum('status', ['pending', 'accepted', 'failed', 'enrolled'])->default('pending');
 
             $table->timestamps();
         });

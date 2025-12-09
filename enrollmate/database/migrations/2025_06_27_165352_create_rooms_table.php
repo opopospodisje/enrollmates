@@ -22,9 +22,9 @@ return new class extends Migration
             $table->string('view')->nullable();
             $table->boolean('featured')->default(false);
             $table->boolean('is_active')->default(true);
-            $table->string('name')->unique(); 
-            $table->foreignId('room_type_id')->constrained('room_types')->onDelete('cascade'); 
-            $table->foreignId('sub_room_of')->nullable()->constrained('rooms')->onDelete('cascade'); 
+            $table->string('name')->unique();
+            $table->foreignId('room_type_id')->constrained('room_types')->onDelete('cascade');
+            $table->foreignId('sub_room_of')->nullable()->constrained('rooms')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -35,7 +35,7 @@ class UpdateRoomRequest extends FormRequest
             'sub_room_of' => ['nullable', 'exists:rooms,id'],
 
             // File validation
-            //'attachments.*' => ['file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // max 5MB per file
+            // 'attachments.*' => ['file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // max 5MB per file
             'deleted_attachments' => ['nullable', 'array'],
             'deleted_attachments.*' => ['integer', 'exists:file_attachments,id'],
         ];

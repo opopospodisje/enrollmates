@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Tinify\Tinify;
 use Illuminate\Support\ServiceProvider;
+use Tinify\Tinify;
 
 class AppServiceProvider extends ServiceProvider
 {

@@ -34,18 +34,17 @@ class StoreSectionRequest extends FormRequest
                     if (request('is_special') && $value === null) {
                         $fail('Cutoff grade is required for special sections.');
                     }
-                }
+                },
             ],
         ];
     }
 
     protected function prepareForValidation()
     {
-        if (!$this->boolean('is_special')) {
+        if (! $this->boolean('is_special')) {
             $this->merge([
                 'cutoff_grade' => null,
             ]);
         }
     }
-
 }

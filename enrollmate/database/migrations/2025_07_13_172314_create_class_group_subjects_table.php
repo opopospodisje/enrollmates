@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('class_group_subjects', function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('class_group_id')->constrained()->onDelete('cascade');
             $table->foreignId('subject_id')->constrained()->onDelete('cascade');
             $table->foreignId('teacher_id')->nullable()->constrained()->onDelete('set null'); // optional

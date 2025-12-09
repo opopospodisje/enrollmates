@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('enrollments', function (Blueprint $table) {
             $table->id();
-            
+
             // Foreign keys
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->foreignId('class_group_id')->constrained()->onDelete('cascade');
@@ -21,7 +21,7 @@ return new class extends Migration
             // Enrollment details
             $table->date('enrolled_at')->nullable();  // optional, when they were officially enrolled
             $table->enum('status', ['new', 'promoted', 'retained', 'transferred', 'dropped'])->default('new');
-            
+
             $table->timestamps();
 
             $table->unique(['student_id', 'class_group_id']);

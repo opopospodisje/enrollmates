@@ -2,20 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Enrollment;
-use App\Models\ClassGroup;
-use App\Models\Student;
-use App\Models\ClassGroupSubject;
-use App\Models\GradeLevel;
-use App\Models\Grade;
-use App\Models\Section;
-use App\Models\SchoolYear;
 use App\Http\Requests\StoreEnrollmentRequest;
 use App\Http\Requests\UpdateEnrollmentRequest;
+use App\Models\ClassGroup;
+use App\Models\ClassGroupSubject;
+use App\Models\Enrollment;
+use App\Models\Grade;
+use App\Models\GradeLevel;
+use App\Models\SchoolYear;
+use App\Models\Section;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
 
 class EnrollmentController extends Controller
 {
@@ -29,7 +28,7 @@ class EnrollmentController extends Controller
 
         $selectedLevel = $request->query('level', 'allLevels');
         $selectedSection = $request->query('section', 'allSections');
-        $selectedSchoolYear = $request->query('schoolYear', $activeSchoolYearId);   
+        $selectedSchoolYear = $request->query('schoolYear', $activeSchoolYearId);
 
         // Get all Grade Levels
         $gradeLevels = GradeLevel::select('id', 'name')->get();
@@ -70,7 +69,6 @@ class EnrollmentController extends Controller
             });
         }
 
-
         // Execute enrollment query
         $enrollments = $enrollmentQuery
             ->with(['student', 'classGroup.section.gradeLevel', 'classGroup.schoolYear'])
@@ -81,9 +79,9 @@ class EnrollmentController extends Controller
                     'id' => $enrollment->id,
                     'student_id' => $enrollment->student_id,
                     'student_name' => trim(
-                        $enrollment->student->last_name . ', ' .
-                        $enrollment->student->first_name . ' ' .
-                        ($enrollment->student->middle_name ?? '') . ' ' .
+                        $enrollment->student->last_name.', '.
+                        $enrollment->student->first_name.' '.
+                        ($enrollment->student->middle_name ?? '').' '.
                         ($enrollment->student->suffix ?? '')
                     ),
                     'class_group_id' => $enrollment->class_group_id,
@@ -111,9 +109,9 @@ class EnrollmentController extends Controller
 
         // ClassGroups with active school year
         $classGroups = ClassGroup::with([
-                'section.gradeLevel:id,name',
-                'schoolYear:id,name,is_active',
-            ])
+            'section.gradeLevel:id,name',
+            'schoolYear:id,name,is_active',
+        ])
             ->withCount('enrollments')
             ->whereHas('schoolYear', $activeSchoolYear)
             ->get();
@@ -184,9 +182,9 @@ class EnrollmentController extends Controller
                     'id' => $enrollment->id,
                     'student_id' => $enrollment->student_id,
                     'student_name' => trim(
-                        $enrollment->student->last_name . ', ' .
-                        $enrollment->student->first_name . ' ' .
-                        ($enrollment->student->middle_name ?? '') . ' ' .
+                        $enrollment->student->last_name.', '.
+                        $enrollment->student->first_name.' '.
+                        ($enrollment->student->middle_name ?? '').' '.
                         ($enrollment->student->suffix ?? '')
                     ),
                     'class_group_id' => $enrollment->class_group_id,
@@ -211,9 +209,9 @@ class EnrollmentController extends Controller
         };
 
         $classGroups = ClassGroup::with([
-                'section.gradeLevel:id,name',
-                'schoolYear:id,name,is_active',
-            ])
+            'section.gradeLevel:id,name',
+            'schoolYear:id,name,is_active',
+        ])
             ->withCount('enrollments')
             ->whereHas('schoolYear', $activeSchoolYear)
             ->whereIn('id', $teacherClassGroupIds)
@@ -231,7 +229,6 @@ class EnrollmentController extends Controller
             'selectedSchoolYear' => $selectedSchoolYear,
         ]);
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -258,7 +255,7 @@ class EnrollmentController extends Controller
             $ownsClass = ClassGroupSubject::where('class_group_id', $validated['class_group_id'])
                 ->where('teacher_id', $teacherId)
                 ->exists();
-            if (!$ownsClass) {
+            if (! $ownsClass) {
                 abort(403);
             }
         }
@@ -284,6 +281,7 @@ class EnrollmentController extends Controller
         if ($role === 'teacher') {
             return redirect()->route('teacher.enrollments.index')->with('success', 'Enrollment created successfully.');
         }
+
         return redirect()->route('admin.enrollments.index')->with('success', 'Enrollment created successfully.');
     }
 
@@ -310,7 +308,7 @@ class EnrollmentController extends Controller
     {
         $validated = $request->validated();
 
-         $enrollment->update($validated);
+        $enrollment->update($validated);
 
         return redirect()->back()->with('success', 'Enrollment created successfully.');
     }

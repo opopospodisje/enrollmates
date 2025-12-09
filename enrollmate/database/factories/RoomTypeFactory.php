@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -16,7 +15,7 @@ class RoomTypeFactory extends Factory
                 'Suite',
                 'Deluxe Room',
                 'Family Room',
-                'Executive Suite'
+                'Executive Suite',
             ]),
         ];
     }

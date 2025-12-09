@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\LoginInfo;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,7 +13,6 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use Jenssegers\Agent\Agent;
-use App\Models\LoginInfo;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -42,16 +43,34 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
+            if (! $user || ! ($user instanceof User)) {
+                Auth::logout();
+
+                return redirect()->route('login')->withErrors(['email' => 'Authentication error.']);
+            }
 
             // ✅ Spatie role-based redirection
             if ($user->hasRole('admin')) {
                 return redirect()->intended(route('admin.dashboard', absolute: false));
             } elseif ($user->hasRole('teacher')) {
+                $teacher = $user->teacher;
+                if (! $teacher) {
+                    Auth::logout();
+
+                    return redirect()->route('login')->withErrors(['email' => 'Teacher profile not found.']);
+                }
+                if ($teacher->is_archived) {
+                    Auth::logout();
+
+                    return redirect()->route('login')->withErrors(['email' => 'Account archived.']);
+                }
+
                 return redirect()->route('teacher.dashboard');
             } elseif ($user->hasRole('student')) {
                 return redirect()->route('student.home');
             } else {
                 Auth::logout();
+
                 return redirect()->route('login')->withErrors(['email' => 'Unauthorized role.']);
             }
 
@@ -81,7 +100,7 @@ class AuthenticatedSessionController extends Controller
      */
     private function logLoginAttempt(Request $request, $status)
     {
-        $agent = new Agent();
+        $agent = new Agent;
 
         LoginInfo::create([
             'email' => $request->email,
@@ -101,10 +120,10 @@ class AuthenticatedSessionController extends Controller
     {
         // Find the last pending login attempt for the given email and IP
         $loginInfo = LoginInfo::where('email', $request->email)
-                              ->where('ip_address', $request->ip())
-                              ->where('status', 'pending')
-                              ->latest()
-                              ->first();
+            ->where('ip_address', $request->ip())
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
 
         if ($loginInfo) {
             $loginInfo->update(['status' => $status]);

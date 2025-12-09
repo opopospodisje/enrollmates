@@ -16,7 +16,7 @@ class Section extends Model
     ];
 
     protected $fillable = [
-        'name', 
+        'name',
         'grade_level_id',
         'cutoff_grade', // Only for special or selective sections
         'is_special', // For identifying special sections

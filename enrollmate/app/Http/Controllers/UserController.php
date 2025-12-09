@@ -2,24 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
-use Spatie\Permission\Models\Role;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-
-
     public function index()
     {
-        $users = User::with('roles')->get();
-        $roles = Role::all(['id', 'name']); // You can select specific fields if needed
+        $view = request()->query('view', 'all');
+
+        $query = User::with(['roles', 'teacher']);
+
+        if ($view === 'archived_teachers') {
+            $query->whereHas('roles', function ($q) {
+                $q->where('name', 'teacher');
+            })->whereHas('teacher', function ($q) {
+                $q->where('is_archived', true);
+            });
+        }
+
+        $users = $query->get();
+        $roles = Role::all(['id', 'name']);
 
         return inertia('admin/users/index', [
             'users' => $users->map(function ($user) {
@@ -32,14 +41,14 @@ class UserController extends Controller
                     'email' => $user->email,
                     'role' => $user->roles->pluck('name')->first(),
                     'role_id' => $user->roles->pluck('id')->first(),
-                    'role_id' => $user->roles->pluck('id')->first(),
                     'is_verified' => $user->email_verified_at ? 'Verified' : 'Unverified',
+                    'is_archived' => optional($user->teacher)->is_archived ?? false,
                 ];
             }),
-            'roles' => $roles, // send to frontend
+            'roles' => $roles,
+            'view' => $view,
         ]);
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -100,7 +109,6 @@ class UserController extends Controller
         ]);
     }
 
-
     /**
      * Show the form for editing the specified resource.
      */
@@ -131,7 +139,6 @@ class UserController extends Controller
 
         return redirect()->back()->with('success', 'User updated successfully!');
     }
-
 
     /**
      * Remove the specified resource from storage.

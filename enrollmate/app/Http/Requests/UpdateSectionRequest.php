@@ -24,12 +24,12 @@ class UpdateSectionRequest extends FormRequest
     {
         // $this->section comes from route‑model binding:  /sections/{section}
         return [
-            'name'=> ['required','string','max:255',Rule::unique('sections', 'name')->ignore($this->section?->id)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('sections', 'name')->ignore($this->section?->id)],
             'grade_level_id' => ['required', 'exists:grade_levels,id'],
 
-            'is_special'     => ['boolean'],
+            'is_special' => ['boolean'],
             // Optional, numeric 0‑100, and **required if is_special = true**
-            'cutoff_grade'   => ['nullable','numeric','min:0','max:100',
+            'cutoff_grade' => ['nullable', 'numeric', 'min:0', 'max:100',
                 function ($attribute, $value, $fail) {
                     if ($this->boolean('is_special') && $value === null) {
                         $fail('Cutoff grade is required for special sections.');
@@ -41,11 +41,10 @@ class UpdateSectionRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        if (!$this->boolean('is_special')) {
+        if (! $this->boolean('is_special')) {
             $this->merge([
                 'cutoff_grade' => null,
             ]);
         }
     }
-
 }

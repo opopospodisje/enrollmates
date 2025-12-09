@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Enrollment;
-use App\Models\Student;
 use App\Models\ClassGroup;
 use App\Models\ClassGroupSubject;
+use App\Models\Enrollment;
 use App\Models\Grade;
+use App\Models\Student;
+use Illuminate\Database\Seeder;
 
 class EnrollmentSeeder extends Seeder
 {
@@ -17,18 +16,20 @@ class EnrollmentSeeder extends Seeder
         // 1️⃣ Get the first student (assuming StudentSeeder created one)
         $student = Student::first();
 
-        if (!$student) {
+        if (! $student) {
             $this->command->error('No student found. Please run StudentSeeder first.');
+
             return;
         }
 
         // 2️⃣ Get a regular class group (not special) in the active school year
-        $classGroup = ClassGroup::whereHas('section', fn($q) => $q->where('is_special', false))
-            ->whereHas('schoolYear', fn($q) => $q->where('is_active', true))
+        $classGroup = ClassGroup::whereHas('section', fn ($q) => $q->where('is_special', false))
+            ->whereHas('schoolYear', fn ($q) => $q->where('is_active', true))
             ->first();
 
-        if (!$classGroup) {
+        if (! $classGroup) {
             $this->command->error('No regular class group found for active school year.');
+
             return;
         }
 

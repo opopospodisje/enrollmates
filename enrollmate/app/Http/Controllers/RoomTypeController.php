@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RoomType;
 use App\Http\Requests\StoreRoomTypeRequest;
 use App\Http\Requests\UpdateRoomTypeRequest;
-use Inertia\Inertia;
+use App\Models\RoomType;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class RoomTypeController extends Controller
 {
@@ -15,7 +15,8 @@ class RoomTypeController extends Controller
      */
     public function index()
     {
-        $roomtype = RoomType::select( 'id', 'name')->get( );
+        $roomtype = RoomType::select('id', 'name')->get();
+
         return inertia('roomtype/index', [
             'roomTypes' => $roomtype,
         ]);
@@ -24,17 +25,15 @@ class RoomTypeController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(StoreRoomTypeRequest $request)
     {
-        //dump
-        //dd($request->all());
+        // dump
+        // dd($request->all());
         $validated = $request->validate([
             'name' => 'required|string|unique:room_types,name',
         ]);
@@ -47,7 +46,6 @@ class RoomTypeController extends Controller
     /**
      * Display the specified resource.
      */
-
     public function show(RoomType $roomType)
     {
         // Load rooms under this type with relationships
@@ -64,7 +62,7 @@ class RoomTypeController extends Controller
             'roomTypes' => RoomType::all(),
 
             // Main list of rooms to display (still only those under this RoomType)
-            'rooms' => $roomType->rooms->map(fn($room) => [
+            'rooms' => $roomType->rooms->map(fn ($room) => [
                 'id' => $room->id,
                 'name' => $room->name,
                 'size' => $room->size,
@@ -79,29 +77,26 @@ class RoomTypeController extends Controller
                 'description' => $room->description,
                 'featured' => (bool) $room->featured,
                 'is_active' => (bool) $room->is_active,
-                'attachments' => $room->fileAttachments->map(fn($attachment) => [
+                'attachments' => $room->fileAttachments->map(fn ($attachment) => [
                     'id' => $attachment->id,
                     'file_name' => $attachment->file_name,
-                    'file_path' => asset('storage/' . $attachment->file_path),
+                    'file_path' => asset('storage/'.$attachment->file_path),
                     'file_type' => $attachment->file_type,
                 ]),
             ]),
 
             // NEW: All rooms for dropdown
-            'allRooms' => $allRooms->map(fn($r) => [
+            'allRooms' => $allRooms->map(fn ($r) => [
                 'id' => $r->id,
                 'name' => $r->name,
             ]),
         ]);
     }
 
-
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(RoomType $roomType)
-    {
-    }
+    public function edit(RoomType $roomType) {}
 
     /**
      * Update the specified resource in storage.
@@ -129,7 +124,7 @@ class RoomTypeController extends Controller
 
     public function bulkDelete(Request $request)
     {
-        //dd($request->all());
+        // dd($request->all());
         $ids = $request->input('ids');
 
         if (empty($ids)) {

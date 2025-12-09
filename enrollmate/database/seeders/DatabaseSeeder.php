@@ -3,12 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\RoomType;
-use App\Models\Room;
-use App\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Database\Seeders\RolesAndPermissionsSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,16 +17,15 @@ class DatabaseSeeder extends Seeder
 
         // Create Admin
         $admin = User::create([
-            'first_name'     => 'Admin',
-            'last_name'      => 'Test',
+            'first_name' => 'Admin',
+            'last_name' => 'Test',
             'contact_number' => '09123456789',
-            'address'        => 'Baguio City',
-            'email'          => 'admin@enrollmate.com',
+            'address' => 'Baguio City',
+            'email' => 'admin@enrollmate.com',
             'email_verified_at' => Carbon::now(),
-            'password'       => bcrypt('password'),
+            'password' => bcrypt('password'),
         ]);
         $admin->assignRole('admin');
-
 
         $this->call([
             SchoolYearSeeder::class,

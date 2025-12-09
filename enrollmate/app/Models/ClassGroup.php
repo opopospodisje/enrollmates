@@ -34,14 +34,13 @@ class ClassGroup extends Model
         return $this->hasMany(ClassGroupSubject::class);
     }
 
-    //public function adviser()
-    //{
+    // public function adviser()
+    // {
     //    return $this->belongsTo(Teacher::class, 'adviser_id');
-    //}
+    // }
 
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class);
     }
-
 }

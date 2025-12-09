@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\RoomType;
-use App\Models\FileAttachment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -13,8 +12,8 @@ class RoomFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->unique()->words(2, true), 
-            'view' => $this->faker->unique()->words(2, true), 
+            'name' => $this->faker->unique()->words(2, true),
+            'view' => $this->faker->unique()->words(2, true),
             'description' => $this->faker->sentence(),
             'price' => $this->faker->randomFloat(2, 500, 5000),
             'capacity' => $this->faker->numberBetween(1, 6),
@@ -55,5 +54,4 @@ class RoomFactory extends Factory
             }
         });
     }
-
 }

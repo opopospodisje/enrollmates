@@ -27,4 +27,3 @@ class ApplicantEmailOtp extends Model
         return $this->belongsTo(Applicant::class);
     }
 }
-

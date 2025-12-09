@@ -10,8 +10,8 @@ class Subject extends Model
     /** @use HasFactory<\Database\Factories\SubjectFactory> */
     use HasFactory;
 
-    //cast
-    protected $casts =[
+    // cast
+    protected $casts = [
         'is_special' => 'boolean',
     ];
 
@@ -25,5 +25,4 @@ class Subject extends Model
     {
         return $this->hasMany(ClassGroupSubject::class);
     }
-    
 }

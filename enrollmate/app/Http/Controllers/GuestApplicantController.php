@@ -9,13 +9,13 @@ use App\Models\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\URL;
 
 class GuestApplicantController extends Controller
 {
     public function create()
     {
         $currentSchoolYear = SchoolYear::where('is_active', true)->first();
+
         return inertia('auth/signup', [
             'currentSchoolYear' => $currentSchoolYear ? [
                 'id' => $currentSchoolYear->id,
@@ -42,7 +42,7 @@ class GuestApplicantController extends Controller
             'expires_at' => now()->addMinutes(10),
         ]);
 
-        Mail::raw('Your verification code is: ' . $code, function ($message) use ($applicant) {
+        Mail::raw('Your verification code is: '.$code, function ($message) use ($applicant) {
             $message->to($applicant->email)->subject('Email Verification Code');
         });
 
@@ -52,6 +52,7 @@ class GuestApplicantController extends Controller
     public function showVerifyForm(Request $request)
     {
         $applicantId = (int) $request->query('applicant_id');
+
         return inertia('auth/verify-otp', [
             'applicantId' => $applicantId,
         ]);
@@ -71,7 +72,7 @@ class GuestApplicantController extends Controller
             ->orderByDesc('id')
             ->first();
 
-        if (!$otp) {
+        if (! $otp) {
             return Redirect::back()->withErrors(['code' => 'Invalid code.']);
         }
 
@@ -81,7 +82,7 @@ class GuestApplicantController extends Controller
 
         $isValid = hash_equals($otp->code_hash, hash('sha256', $code));
 
-        if (!$isValid) {
+        if (! $isValid) {
             return Redirect::back()->withErrors(['code' => 'Invalid code.']);
         }
 
@@ -108,7 +109,7 @@ class GuestApplicantController extends Controller
             'expires_at' => now()->addMinutes(10),
         ]);
 
-        Mail::raw('Your verification code is: ' . $code, function ($message) use ($applicant) {
+        Mail::raw('Your verification code is: '.$code, function ($message) use ($applicant) {
             $message->to($applicant->email)->subject('Email Verification Code');
         });
 
