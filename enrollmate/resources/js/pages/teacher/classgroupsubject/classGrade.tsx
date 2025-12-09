@@ -1,26 +1,21 @@
-import { type BreadcrumbItem } from '@/types';
-import AppLayout from '@/layouts/app-layout';
-import { Head, useForm ,Link} from '@inertiajs/react';
-import * as React from "react"
-import { Toaster } from '@/components/ui/sonner';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import { Separator } from '@/components/ui/separator';
+import { Toaster } from '@/components/ui/sonner';
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-  TableFooter,
-} from "@/components/ui/table"
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Input } from "@/components/ui/input";
-import { useRef } from "react";
-import { debounce } from "lodash";
+  TableRow
+} from "@/components/ui/table";
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowDown01, ArrowDown10, ChevronLeft } from 'lucide-react';
+import * as React from "react";
 import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -99,7 +94,11 @@ const ClassGrade = ({classGroupSubject, grades,settings }: ClassGradeProps) => {
   
   const getSetting = (name: string) => settings.find(s => s.setting_name === name);
 
-  const isInputAllowed = getSetting('enable_all_quarters_input')?.value === 'true';
+  const allowQ1 = getSetting('enable_first_quarter_input')?.value === 'true';
+  const allowQ2 = getSetting('enable_second_quarter_input')?.value === 'true';
+  const allowQ3 = getSetting('enable_third_quarter_input')?.value === 'true';
+  const allowQ4 = getSetting('enable_fourth_quarter_input')?.value === 'true';
+  const allowFinal = getSetting('enable_final_grade_input')?.value === 'true';
 
   const getDefaultGradeFormData = (): GradeFormData => ({
     grades: grades.map(g => ({
@@ -116,21 +115,56 @@ const ClassGrade = ({classGroupSubject, grades,settings }: ClassGradeProps) => {
 
 
   const { data, setData, put, processing } = useForm(getDefaultGradeFormData());
+  const [sortDesc, setSortDesc] = React.useState(true);
+
+  React.useEffect(() => {
+    const sorted = [...data.grades].sort((a, b) => {
+      const af = a.final_grade ?? -Infinity;
+      const bf = b.final_grade ?? -Infinity;
+      return bf - af; // descending on mount
+    });
+    setData('grades', sorted);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const resort = (desc: boolean) => {
+    const sorted = [...data.grades].sort((a, b) => {
+      const af = a.final_grade ?? -Infinity;
+      const bf = b.final_grade ?? -Infinity;
+      return desc ? bf - af : af - bf;
+    });
+    setData('grades', sorted);
+  };
+
+  const toggleSort = () => {
+    const next = !sortDesc;
+    setSortDesc(next);
+    resort(next);
+  };
 
   
   const updateGrade = (index: number, field: keyof ClassGradeFormData, value: string) => {
     let numValue = value === "" ? null : Number(value);
-
-    // Only format if it's a number
     if (numValue !== null && !isNaN(numValue)) {
-      // toFixed returns a string, so parse back to float for data storage
       numValue = parseFloat(numValue.toFixed(2));
     }
 
-    const updatedGrades = data.grades.map((g, i) =>
-      i === index ? { ...g, [field]: numValue } : g
-    );
-    setData("grades", updatedGrades);
+    let updatedGrades = data.grades.map((g, i) => (i === index ? { ...g, [field]: numValue } : g));
+
+    const g = updatedGrades[index];
+    const q = [g.first_quarter, g.second_quarter, g.third_quarter, g.fourth_quarter].filter(v => typeof v === 'number' && !isNaN(v as number)) as number[];
+    if (q.length === 4 || q.length > 0) {
+      const avg = parseFloat((q.reduce((s, v) => s + v, 0) / q.length).toFixed(2));
+      updatedGrades[index] = { ...g, final_grade: avg };
+    }
+
+    if (sortDesc) {
+      updatedGrades = [...updatedGrades].sort((a, b) => (b.final_grade ?? -Infinity) - (a.final_grade ?? -Infinity));
+    } else {
+      updatedGrades = [...updatedGrades].sort((a, b) => (a.final_grade ?? -Infinity) - (b.final_grade ?? -Infinity));
+    }
+
+    setData('grades', updatedGrades);
   };
 
   const submitGrades = () => {
@@ -187,7 +221,12 @@ const ClassGrade = ({classGroupSubject, grades,settings }: ClassGradeProps) => {
             <TableHead className='text-center w-40'>2nd Quarter</TableHead>
             <TableHead className='text-center w-40'>3rd Quarter</TableHead>
             <TableHead className='text-center w-40'>4th Quarter</TableHead>
-            <TableHead className='text-center w-50'>Final Grade</TableHead>
+            <TableHead className='text-center w-50'>
+              <Button variant={'ghost'} onClick={toggleSort} className='w-full flex justify-between items-center'>
+                <span>Final Grade</span>
+                {sortDesc ? <ArrowDown10 size={16} /> : <ArrowDown01 size={16} />}
+              </Button>
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -214,7 +253,7 @@ const ClassGrade = ({classGroupSubject, grades,settings }: ClassGradeProps) => {
 
                     updateGrade(index, "first_quarter", value.toString());
                   }}
-                  readOnly={!isInputAllowed}
+                  readOnly={!allowQ1}
                 />
               </TableCell>
               <TableCell>
@@ -235,7 +274,7 @@ const ClassGrade = ({classGroupSubject, grades,settings }: ClassGradeProps) => {
 
                     updateGrade(index, "second_quarter", value.toString());
                   }}
-                  readOnly={!isInputAllowed}
+                  readOnly={!allowQ2}
                 />
               </TableCell>
               <TableCell>
@@ -256,7 +295,7 @@ const ClassGrade = ({classGroupSubject, grades,settings }: ClassGradeProps) => {
 
                     updateGrade(index, "third_quarter", value.toString());
                   }}
-                  readOnly={!isInputAllowed}
+                  readOnly={!allowQ3}
                 />
               </TableCell>
               <TableCell>
@@ -277,7 +316,7 @@ const ClassGrade = ({classGroupSubject, grades,settings }: ClassGradeProps) => {
 
                     updateGrade(index, "fourth_quarter", value.toString());
                   }}
-                  readOnly={!isInputAllowed}
+                  readOnly={!allowQ4}
                 />
               </TableCell>
               <TableCell>
@@ -298,7 +337,7 @@ const ClassGrade = ({classGroupSubject, grades,settings }: ClassGradeProps) => {
 
                     updateGrade(index, "final_grade", value.toString());
                   }}
-                  readOnly={!isInputAllowed}
+                  readOnly={!allowFinal}
                 />
               </TableCell>
             </TableRow>
@@ -306,7 +345,7 @@ const ClassGrade = ({classGroupSubject, grades,settings }: ClassGradeProps) => {
         </TableBody>
       </Table>
       <div className='flex justify-end'>
-        {isInputAllowed &&
+        {(allowQ1 || allowQ2 || allowQ3 || allowQ4 || allowFinal) &&
           <Button
             type="button"
             onClick={submitGrades}
