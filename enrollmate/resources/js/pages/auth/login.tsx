@@ -44,7 +44,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     <img src={logo} alt="School Logo" className="h-52 w-52 md:h-60 md:w-60 object-contain" />
                     <div className="text-center">
                         <p className="text-2xl md:text-3xl font-bold text-neutral-700">Welcome to</p>
-                        <h1 className="text-5xl md:text-6xl font-black text-red-600">Enroll_Mate</h1>
+                        <h1 className="text-5xl md:text-6xl font-black text-red-600">Enrollmate</h1>
                     </div>
                 </div>
                 <PlaceholderPattern className="absolute left-6 bottom-6 h-24 w-24 text-red-600 opacity-60" variant="dots" corner="bottom-left" />

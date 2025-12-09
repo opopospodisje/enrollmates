@@ -15,7 +15,7 @@ export default function AppLogo({withText = true}:props) {
 
             {withText &&
                 <div className="ml-1 grid text-left text-sm">
-                    <span className="mb-0.5 truncate leading-tight font-semibold">Enroll_Mate</span>
+                    <span className="mb-0.5 truncate leading-tight font-semibold">Enrollmate</span>
                 </div>
             }
         </>
