@@ -1,24 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { useForm } from '@inertiajs/react';
-import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CalendarCheck, CalendarDays, List, Mail, MapPin, Pencil, PencilLine, SquarePen, VenusAndMars } from 'lucide-react';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select";
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select"
-import { Switch } from '@/components/ui/switch';
-import { Checkbox } from '@/components/ui/checkbox';
+import { useForm } from '@inertiajs/react';
+import { CalendarDays, List, Mail, MapPin, PencilLine, SquarePen, VenusAndMars } from 'lucide-react';
+import React, { useState } from 'react';
+import { toast } from 'sonner';
 
 type Teacher = {
   id?: number;

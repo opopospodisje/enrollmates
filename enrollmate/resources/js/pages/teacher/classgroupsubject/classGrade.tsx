@@ -4,12 +4,12 @@ import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/sonner';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
 } from "@/components/ui/table";
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';

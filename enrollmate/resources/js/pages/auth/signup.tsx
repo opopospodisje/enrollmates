@@ -77,7 +77,7 @@ export default function Signup({ currentSchoolYear }: Props) {
         </div>
 
         <div className="grid gap-2">
-          <Label className="text-white">Gender</Label>
+          <Label className="text-white">*Gender</Label>
           <Select value={data.gender} onValueChange={(value) => setData('gender', value)}>
             <SelectTrigger className="bg-white text-black border-0">
               <SelectValue placeholder="Select Gender" />

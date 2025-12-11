@@ -1,20 +1,20 @@
-import { type BreadcrumbItem } from '@/types';
-import AppLayout from '@/layouts/app-layout';
-import { Head, router, useForm } from '@inertiajs/react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { BookUp2, FilePlus, List } from 'lucide-react';
-import * as React from "react"
-import { ColumnFiltersState, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState, } from "@tanstack/react-table"
-import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
-import { Separator } from '@/components/ui/separator';
-import TableToolbar from '@/components/table/TableToolbar';
-import { useState } from 'react';
-import CreateApplicantDialog from './Components/CreateApplicantDialog';
-import RoomTable from '@/components/table/RoomTable';
-import { getColumns } from './Components/applicantColumns';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import Heading from '@/components/heading';
+import RoomTable from '@/components/table/RoomTable';
+import TableToolbar from '@/components/table/TableToolbar';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Separator } from '@/components/ui/separator';
+import { Toaster } from '@/components/ui/sonner';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, router, useForm } from '@inertiajs/react';
+import { ColumnFiltersState, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState, } from "@tanstack/react-table";
+import { BookUp2, List } from 'lucide-react';
+import * as React from "react";
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { getColumns } from './Components/applicantColumns';
+import CreateApplicantDialog from './Components/CreateApplicantDialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
