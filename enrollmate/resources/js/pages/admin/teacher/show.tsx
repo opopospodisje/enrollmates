@@ -1,10 +1,10 @@
-import { type BreadcrumbItem } from '@/types';
-import AppLayout from '@/layouts/app-layout';
-import { Head, Link } from '@inertiajs/react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import Heading from '@/components/heading';
-import { UserCircle, ArrowLeft } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link } from '@inertiajs/react';
+import { ArrowLeft, UserCircle } from 'lucide-react';
 
 type Teacher = {
   id: number;

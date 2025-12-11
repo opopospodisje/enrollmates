@@ -151,6 +151,15 @@ class ApplicantController extends Controller
 
         $applicant->update($validatedData);
 
+        $user = Auth::user();
+        $role = $user ? DB::table('model_has_roles')
+            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('model_has_roles.model_id', $user->id)
+            ->value('roles.name') : null;
+        if ($role === 'teacher') {
+            return redirect()->route('teacher.applicants.index')->with('success', 'Applicant updated successfully.');
+        }
+
         return redirect()->route('admin.applicants.index')->with('success', 'Applicant updated successfully.');
     }
 
@@ -160,6 +169,15 @@ class ApplicantController extends Controller
     public function destroy(Applicant $applicant)
     {
         $applicant->delete();
+
+        $user = Auth::user();
+        $role = $user ? DB::table('model_has_roles')
+            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('model_has_roles.model_id', $user->id)
+            ->value('roles.name') : null;
+        if ($role === 'teacher') {
+            return redirect()->route('teacher.applicants.index')->with('success', 'Applicant deleted successfully.');
+        }
 
         return redirect()->route('admin.applicants.index')->with('success', 'Applicant deleted successfully.');
     }

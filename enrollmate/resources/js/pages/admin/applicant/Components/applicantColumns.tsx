@@ -1,28 +1,26 @@
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
 import {
-  ArrowDown01,
-  ArrowDown10,
-  ArrowDownAZ,
-  ArrowDownZA,
-  Eye,
-  Trash2,
-} from "lucide-react";
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ColumnDef } from "@tanstack/react-table";
-import EditApplicantDialog from "./EditApplicantDialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ColumnDef } from "@tanstack/react-table";
+import {
+    ArrowDown01,
+    ArrowDown10,
+    ArrowDownAZ,
+    ArrowDownZA,
+    Trash2
+} from "lucide-react";
+import EditApplicantDialog from "./EditApplicantDialog";
 
 type GradeLevel = {
   id: number;
@@ -59,11 +57,13 @@ type Applicant = {
 export const getColumns = ({
   gradeLevels,schoolYears,currentSchoolYear,
   handleDelete,
+  updateRoute,
 }: {
   gradeLevels: GradeLevel[];
   schoolYears: SchoolYear[];
   currentSchoolYear: SchoolYear | null;
   handleDelete: (id: number) => void;
+  updateRoute?: string;
 }): ColumnDef<Applicant>[] => [
 
     {
@@ -263,7 +263,7 @@ export const getColumns = ({
         const applicant = row.original;
         return (
           <div className="flex justify-center gap-2">
-           <EditApplicantDialog applicant={applicant} gradeLevels={gradeLevels} schoolYears={schoolYears} currentSchoolYear={currentSchoolYear}/>
+           <EditApplicantDialog applicant={applicant} gradeLevels={gradeLevels} schoolYears={schoolYears} currentSchoolYear={currentSchoolYear} updateRoute={updateRoute}/>
 
             <AlertDialog>
               <AlertDialogTrigger asChild><Button variant={'outline'} className='text-red-600'><Trash2 /></Button></AlertDialogTrigger>

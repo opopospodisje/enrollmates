@@ -274,6 +274,9 @@ Route::middleware(['auth', 'verified', 'role:teacher'])
         Route::prefix('applicants')->name('applicants.')->group(function () {
             Route::get('/', [ApplicantController::class, 'teacherIndex'])->name('index');
             Route::post('/', [ApplicantController::class, 'store'])->name('store');
+            Route::put('/{applicant}', [ApplicantController::class, 'update'])->name('update');
+            Route::delete('/{applicant}', [ApplicantController::class, 'destroy'])->name('destroy');
+            Route::post('/bulk-delete', [ApplicantController::class, 'bulkDelete'])->name('bulkDelete');
         });
     });
 

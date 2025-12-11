@@ -1,25 +1,25 @@
-import { type BreadcrumbItem } from '@/types';
-import AppLayout from '@/layouts/app-layout';
-import { Head, router, useForm } from '@inertiajs/react';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { BookUp2, CalendarDays, FilePlus, List, ListTodo } from 'lucide-react';
-import * as React from "react"
-import { ColumnFiltersState, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState, } from "@tanstack/react-table"
-import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'sonner';
-import { Separator } from '@/components/ui/separator';
-import TableToolbar from '@/components/table/TableToolbar';
-import { useState } from 'react';
-import CreateEnrollmentDialog from './Components/CreateEnrollmentDialog';
-import RoomTable from '@/components/table/RoomTable';
-import { getColumns } from './Components/enrollmentColumns';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import Heading from '@/components/heading';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import RoomTable from '@/components/table/RoomTable';
+import TableToolbar from '@/components/table/TableToolbar';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select";
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from "@/components/ui/select";
+import { Separator } from '@/components/ui/separator';
+import { Toaster } from '@/components/ui/sonner';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, router, useForm } from '@inertiajs/react';
+import { ColumnFiltersState, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable, VisibilityState, } from "@tanstack/react-table";
+import { BookUp2, CalendarDays, FilePlus, List, ListTodo } from 'lucide-react';
+import * as React from "react";
+import { useState } from 'react';
+import { toast } from 'sonner';
+import CreateEnrollmentDialog from './Components/CreateEnrollmentDialog';
+import { getColumns } from './Components/enrollmentColumns';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -162,6 +162,13 @@ const EnrollmentIndex = ({ enrollments,classGroups,students, selectedLevel, sele
   })
 
   const [tab, setTab] = useState<'create' | 'all'>('create');
+  const [studentQuery, setStudentQuery] = useState('');
+  const [studentOpen, setStudentOpen] = useState(false);
+  const [selectedStudentLabel, setSelectedStudentLabel] = useState('');
+
+  const normalize = (v?: string) => (v ?? '').toLowerCase().trim();
+  const studentLabel = (s: Student) => `${s.last_name}, ${s.first_name} ${s.middle_name ?? ''} ${s.suffix ?? ''}`.replace(/\s+/g,' ').trim();
+  const filteredStudents = students.filter((s) => studentLabel(s).toLowerCase().includes(studentQuery.toLowerCase()));
 
   function handleTabChange(newTab: 'create' | 'all') {
     setTab(newTab);
@@ -288,22 +295,44 @@ const EnrollmentIndex = ({ enrollments,classGroups,students, selectedLevel, sele
                           <Label className='font-semibold'>Students</Label>
                         </div>
                         <div className='px-4'>
-                          <Select                     
-                            value={data.student_id === 0 ? '' : data.student_id.toString()}
-                            onValueChange={(value) => setData('student_id', Number(value))}
-                          >
-                          <SelectTrigger className='border border-dashed border-neutral-400'>
-                            <SelectValue placeholder="Select Student" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup className='h-48 overflow-y-auto'>
-                              <SelectLabel>Students</SelectLabel>
-                              {students.map((type) => (
-                                <SelectItem key={type.id} value={type.id.toString()}>{type.last_name},{type.first_name} {type.middle_name} {type.suffix}</SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                          </Select>                
+                          <Popover open={studentOpen} onOpenChange={setStudentOpen}>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className='w-full justify-between border border-dashed border-neutral-400'>
+                                {selectedStudentLabel || 'Select Student'}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className='p-0 w-[320px]'>
+                              <div className='p-2 border-b'>
+                                <Input
+                                  placeholder='Search student...'
+                                  value={studentQuery}
+                                  onChange={(e) => setStudentQuery(e.target.value)}
+                                  className='h-8'
+                                />
+                              </div>
+                              <div className='max-h-48 overflow-y-auto'>
+                                {filteredStudents.length > 0 ? (
+                                  filteredStudents.map((s) => (
+                                    <Button
+                                      key={s.id}
+                                      variant='ghost'
+                                      className='w-full justify-start rounded-none'
+                                      onClick={() => {
+                                        setData('student_id', s.id);
+                                        const lbl = studentLabel(s);
+                                        setSelectedStudentLabel(lbl);
+                                        setStudentOpen(false);
+                                      }}
+                                    >
+                                      {studentLabel(s)}
+                                    </Button>
+                                  ))
+                                ) : (
+                                  <div className='px-2 py-2 text-sm text-muted-foreground'>No results</div>
+                                )}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </div>
                         {errors.student_id && <p className="text-sm text-red-600">{errors.student_id}</p>}
                       </div>

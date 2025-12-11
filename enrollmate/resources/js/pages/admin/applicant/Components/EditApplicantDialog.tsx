@@ -55,9 +55,10 @@ type Props = {
   schoolYears: SchoolYear[];
   currentSchoolYear: SchoolYear | null;
   buttonStyle?: string;
+  updateRoute?: string;
 };
 
-const EditApplicantDialog = ({ applicant ,gradeLevels,schoolYears,currentSchoolYear, buttonStyle}: Props) => {
+const EditApplicantDialog = ({ applicant ,gradeLevels,schoolYears,currentSchoolYear, buttonStyle, updateRoute = 'admin.applicants.update'}: Props) => {
   const [open, setOpen] = useState(false);
 
   const getDefaultApplicantFormData = (): Applicant => ({
@@ -85,7 +86,7 @@ const EditApplicantDialog = ({ applicant ,gradeLevels,schoolYears,currentSchoolY
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    put(route('admin.applicants.update', applicant.id),{
+    put(route(updateRoute, applicant.id),{
       onSuccess: () => {
         toast.success('Applicant updated successfully.');
       },

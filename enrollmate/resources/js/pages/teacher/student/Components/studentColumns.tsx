@@ -1,26 +1,26 @@
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
 import {
-  ArrowDown01,
-  ArrowDown10,
-  ArrowDownAZ,
-  ArrowDownZA,
-  Eye,
-  Trash2,
-} from "lucide-react";
-import { Link } from '@inertiajs/react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Link } from '@inertiajs/react';
 import { ColumnDef } from "@tanstack/react-table";
+import {
+    ArrowDown01,
+    ArrowDown10,
+    ArrowDownAZ,
+    ArrowDownZA,
+    Eye,
+    Trash2,
+} from "lucide-react";
 import EditStudentDialog from "./EditStudentDialog";
 
 type Applicant = {

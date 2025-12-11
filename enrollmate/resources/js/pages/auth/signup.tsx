@@ -35,7 +35,7 @@ export default function Signup({ currentSchoolYear }: Props) {
       <Head title="Sign up" />
       <form className="flex flex-col gap-5" onSubmit={submit}>
         <div className="grid gap-2">
-          <Label htmlFor="first_name" className="text-white">First Name</Label>
+          <Label htmlFor="first_name" className="text-white">*First Name</Label>
           <Input id="first_name" value={data.first_name} onChange={(e) => setData('first_name', e.target.value)} className="bg-white text-black border-0" />
           <InputError message={errors.first_name} />
         </div>
@@ -47,7 +47,7 @@ export default function Signup({ currentSchoolYear }: Props) {
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="last_name" className="text-white">Last Name</Label>
+          <Label htmlFor="last_name" className="text-white">*Last Name</Label>
           <Input id="last_name" value={data.last_name} onChange={(e) => setData('last_name', e.target.value)} className="bg-white text-black border-0" />
           <InputError message={errors.last_name} />
         </div>
@@ -59,7 +59,7 @@ export default function Signup({ currentSchoolYear }: Props) {
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="email" className="text-white">Email</Label>
+          <Label htmlFor="email" className="text-white">*Email</Label>
           <Input id="email" type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} className="bg-white text-black border-0" />
           <InputError message={errors.email} />
         </div>
@@ -77,7 +77,7 @@ export default function Signup({ currentSchoolYear }: Props) {
         </div>
 
         <div className="grid gap-2">
-          <Label className="text-white">Gender</Label>
+          <Label className="text-white">*Gender</Label>
           <Select value={data.gender} onValueChange={(value) => setData('gender', value)}>
             <SelectTrigger className="bg-white text-black border-0">
               <SelectValue placeholder="Select Gender" />

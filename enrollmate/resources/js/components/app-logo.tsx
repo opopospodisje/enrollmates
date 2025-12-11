@@ -1,6 +1,4 @@
-import {BookMarked, Notebook} from 'lucide-react';
-import AppLogoIcon from './app-logo-icon';
-import logo from '@/assets/logo/logo.png'
+import logo from '@/assets/logo/logo.png';
 
 type props = {
     withText?:boolean;
